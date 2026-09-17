@@ -1,0 +1,66 @@
+# ============================================================
+#  ALL Detection System — Evaluation Configuration
+# ============================================================
+
+# ── Model checkpoint ─────────────────────────────────────────
+checkpoint:
+  path: "models/checkpoints/efficientnet_b0_best.pth"   # load best by default
+
+# ── Model architecture (must match training config) ──────────
+model:
+  name:        "efficientnet_b0"
+  num_classes: 1
+  pretrained:  false          # we load from checkpoint, not ImageNet
+  dropout:     0.40
+
+# ── Dataset ──────────────────────────────────────────────────
+dataset:
+  processed_root: "data/processed"
+  augmented_root: "data/augmented"
+  target_size:    224
+  num_workers:    4
+  pin_memory:     true
+
+# ── Evaluation settings ───────────────────────────────────────
+evaluation:
+  # Decision threshold for binary prediction.
+  # null  → auto-select using Youden's J statistic from the ROC curve.
+  # float → fixed value, e.g. 0.40 (lower = higher sensitivity)
+  threshold:   null
+
+  # Which splits to evaluate (any subset of: train, val, test)
+  splits:      ["test"]
+
+  # Output directory for all artifacts (plots, JSON, text report)
+  output_dir:  "logs/evaluation"
+
+  # Label for plot titles
+  model_name:  "EfficientNet-B0"
+
+  # Mixed-precision inference (GPU only)
+  use_amp:     true
+
+  # Batch size for inference (can differ from training)
+  batch_size:  32
+
+  # ── Confidence Estimation ──────────────────────────────────────────────
+  # Number of stochastic MC Dropout forward passes for epistemic uncertainty.
+  # 0  = disabled (fast: boundary + entropy only)
+  # 20 = recommended (adds ~2s per sample on GPU)
+  mc_dropout_passes: 0
+
+  # Risk level boundaries (confidence score thresholds)
+  # LOW:    c >= low_threshold      → prediction is reliable
+  # MEDIUM: c >= medium_threshold   → expert review recommended
+  # HIGH:   c < medium_threshold    → human review REQUIRED
+  risk_threshold_low:    0.80
+  risk_threshold_medium: 0.55
+
+  # Confidence score weights (must sum to 1.0)
+  # [boundary_weight, entropy_weight, mcdrop_weight]
+  # Note: if mc_dropout_passes=0, mcdrop_weight is redistributed automatically
+  confidence_weights: [0.35, 0.35, 0.30]
+
+# ── Class names ───────────────────────────────────────────────
+classes:
+  names: ["Healthy (0)", "ALL+ (1)"]

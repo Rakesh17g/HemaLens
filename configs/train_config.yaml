@@ -1,0 +1,103 @@
+# ============================================================
+#  ALL Detection System — Training Configuration
+# ============================================================
+
+# ── Model ─────────────────────────────────────────────────────
+model:
+  name:         "efficientnet_b0"       # torchvision model key
+  num_classes:  1                        # binary → sigmoid output
+  pretrained:   true                     # load ImageNet weights
+  dropout:      0.40                     # dropout before final FC
+  # Gradual unfreezing: -1 = freeze all backbone, 0 = unfreeze all
+  # Phase indices into model.features blocks to unfreeze per phase
+  unfreeze_schedule:
+    phase1_epochs: 5                     # train head only (backbone frozen)
+    phase2_epochs: 15                    # unfreeze last 3 blocks
+    phase3_epochs: 30                    # unfreeze full backbone
+
+# ── Dataset ───────────────────────────────────────────────────
+dataset:
+  processed_root:  "data/processed"
+  augmented_root:  "data/augmented"
+  use_augmented:   true                  # include offline-augmented files
+  target_size:     224                   # EfficientNet-B0 native input
+  num_workers:     4
+  pin_memory:      true
+
+# ── Training ──────────────────────────────────────────────────
+training:
+  epochs:          50
+  batch_size:      16
+  random_seed:     42
+  mixed_precision: true                  # torch.cuda.amp (no-op on CPU)
+  gradient_clip:   1.0                   # max norm for gradient clipping
+  label_smoothing: 0.1                   # reduces overconfidence
+
+# ── Optimizer ─────────────────────────────────────────────────
+optimizer:
+  name:          "adamw"
+  head_lr:       1.0e-3                  # higher LR for randomly-init head
+  backbone_lr:   1.0e-4                  # lower LR for pretrained layers
+  weight_decay:  1.0e-2
+  betas:         [0.9, 0.999]
+  eps:           1.0e-8
+
+# ── Loss ──────────────────────────────────────────────────────
+loss:
+  name:         "focal"                  # options: focal | bce | bce_weighted
+  focal_gamma:  2.0                      # focusing parameter
+  focal_alpha:  0.25                     # positive class weight
+  pos_weight:   1.64                     # for bce_weighted: neg/pos ratio
+
+# ── LR Scheduler ─────────────────────────────────────────────
+scheduler:
+  name:           "cosine_warmup"        # options: cosine_warmup | step | plateau
+  warmup_epochs:  3                      # linear warm-up from lr*0.1
+  min_lr:         1.0e-6
+  # CosineAnnealingWarmRestarts params
+  T_0:            10
+  T_mult:         1
+
+# ── Early Stopping ───────────────────────────────────────────
+early_stopping:
+  enabled:        true
+  monitor:        "val_auc"              # metric to watch (higher = better)
+  patience:       12                     # epochs without improvement
+  min_delta:      1.0e-4                 # minimum change to count as improvement
+  restore_best:   true                   # reload best weights at end
+
+# ── Checkpointing ─────────────────────────────────────────────
+checkpoint:
+  dir:            "models/checkpoints"
+  save_best_only: true
+  monitor:        "val_auc"
+  filename:       "efficientnet_b0_best.pth"
+  save_last:      true                   # also save last epoch
+
+# ── Logging ───────────────────────────────────────────────────
+logging:
+  tensorboard_dir:    "logs/tensorboard"
+  log_interval:       10                 # log every N batches
+  log_images:         true               # log sample batch to TensorBoard
+  log_grad_norm:      true
+  experiment_name:    "ALL_EfficientNetB0"
+
+# ── Output ────────────────────────────────────────────────────
+output:
+  results_dir:     "logs/training"
+  metrics_file:    "logs/training/metrics.json"
+  confusion_matrix: "logs/training/confusion_matrix.png"
+
+# ── Post-training Evaluation ──────────────────────────────
+# Auto-runs EvaluationEngine after trainer.fit() completes.
+evaluation:
+  run_after_training: true          # set false to skip auto-eval
+  threshold:          null          # null = auto Youden's J
+  splits:             ["val", "test"]
+  output_dir:         "logs/evaluation"
+  model_name:         "EfficientNet-B0"
+  use_amp:            true
+  batch_size:         32
+
+classes:
+  names: ["Healthy (0)", "ALL+ (1)"]

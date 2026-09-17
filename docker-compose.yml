@@ -1,0 +1,86 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker Compose — ALL Detection System
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:
+#   docker compose up --build          # start dashboard
+#   docker compose --profile training up  # also start Tensorboard
+#   docker compose run train           # one-off training job
+#   docker compose run evaluate        # one-off evaluation job
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ── Streamlit dashboard ─────────────────────────────────────────────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: all-detection:latest
+    container_name: all-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./models:/app/models:ro          # read-only model weights
+      - ./logs:/app/logs:ro              # read-only evaluation logs
+      - reports_vol:/app/reports         # writable report output
+    environment:
+      - STREAMLIT_SERVER_MAX_UPLOAD_SIZE=50
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── TensorBoard (optional — start with --profile training) ──────────────────
+  tensorboard:
+    image: tensorflow/tensorflow:2.14.0
+    profiles: [training]
+    container_name: all-tensorboard
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./logs:/logs:ro
+    command: tensorboard --logdir=/logs --host=0.0.0.0 --port=6006
+    restart: unless-stopped
+
+  # ── One-off training job ────────────────────────────────────────────────────
+  train:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: all-detection:latest
+    profiles: [tools]
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./configs:/app/configs:ro
+    command: python train.py
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ── One-off evaluation job ──────────────────────────────────────────────────
+  evaluate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: all-detection:latest
+    profiles: [tools]
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models:ro
+      - ./logs:/app/logs
+    command: python evaluate.py --checkpoint models/checkpoints/efficientnet_b0_best.pth
+
+volumes:
+  reports_vol:

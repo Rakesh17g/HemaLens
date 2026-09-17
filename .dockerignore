@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .dockerignore — files excluded from Docker build context
+# ─────────────────────────────────────────────────────────────────────────────
+# Keeping the context small speeds up builds and avoids leaking local artifacts.
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE / OS artefacts
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+Thumbs.db
+*.swp
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+.env
+
+# Test output
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Training data (large — mount as volume at runtime)
+data/
+
+# Model checkpoints (mount as volume at runtime)
+models/checkpoints/
+
+# Logs
+logs/
+
+# Notebooks (not needed in the production image)
+notebooks/
+
+# Local reports output
+reports/
+
+# Docker files themselves (avoid recursive context)
+Dockerfile
+docker-compose.yml
+docker/
+
+# Documentation source
+docs/
+
+# CI/CD
+.github/

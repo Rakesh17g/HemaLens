@@ -1,0 +1,131 @@
+# ============================================================
+#  ALL Detection System — Preprocessing Configuration
+#  All tunable preprocessing hyperparameters live here.
+# ============================================================
+
+paths:
+  idb1_images:    "data/raw/ALL_IDB1/im"
+  idb1_xyc:       "data/raw/ALL_IDB1/xyc"
+  idb2_images:    "data/raw/ALL_IDB2/img"
+  processed_root: "data/processed"
+  augmented_root: "data/augmented"
+  logs:           "logs/preprocessing"
+
+# ── Image Sizing ─────────────────────────────────────────────
+resize:
+  # EfficientNet-B3 native resolution
+  efficientnet_b3:  300
+  # ViT-B/16 native resolution
+  vit_b16:          224
+  # Default used across the pipeline
+  target_size:      300            # (H, W) — square crop
+  interpolation:    "INTER_LANCZOS4"   # highest quality downscale
+
+# ── Stain (Color) Normalization ───────────────────────────────
+stain_normalization:
+  method: "macenko"               # options: macenko | vahadane | reinhard
+  # Macenko SVD parameters
+  angular_percentile: 99
+  luminosity_threshold: 0.8
+  # Reference image index from IDB2 (visually median-stained)
+  reference_image: "Im001_1.tif"
+
+# ── CLAHE (Contrast Limited Adaptive Histogram Equalization) ──
+clahe:
+  enabled: true
+  clip_limit: 2.0                 # Contrast clipping to prevent noise amplification
+  tile_grid_size: [8, 8]          # Tile size for local histogram computation
+  apply_to_channel: "L"           # Apply on L-channel of LAB color space
+
+# ── Image Quality Enhancement ────────────────────────────────
+quality:
+  # Unsharp mask for subtle edge sharpening
+  unsharp_mask:
+    enabled: true
+    kernel_size: 5
+    sigma: 1.0
+    amount: 0.8                   # Sharpening strength (0.5–1.5 recommended)
+    threshold: 0                  # Min pixel diff to apply sharpening
+  # Gaussian denoising before sharpening
+  denoise:
+    enabled: true
+    h: 10                         # Filter strength (luminance)
+    template_window: 7
+    search_window: 21
+
+# ── Data Augmentation ─────────────────────────────────────────
+augmentation:
+  # Applied ONLY during training. Val/Test: no augmentation.
+  enabled_for_train: true
+  # Multiplier: how many augmented copies per original image
+  copies_per_image: 5
+
+  spatial:
+    horizontal_flip:     { p: 0.5 }
+    vertical_flip:       { p: 0.5 }
+    random_rotate_90:    { p: 0.5 }
+    shift_scale_rotate:
+      shift_limit:  0.08
+      scale_limit:  0.10
+      rotate_limit: 20
+      p:            0.6
+    elastic_transform:
+      alpha: 1
+      sigma: 50
+      p:     0.25
+    grid_distortion:     { p: 0.2 }
+    optical_distortion:  { p: 0.2 }
+
+  pixel:
+    random_brightness_contrast:
+      brightness_limit: 0.20
+      contrast_limit:   0.20
+      p:                0.6
+    hue_saturation_value:
+      hue_shift_limit:  10
+      sat_shift_limit:  30
+      val_shift_limit:  20
+      p:                0.5
+    gaussian_blur:       { blur_limit: [3,7], p: 0.3 }
+    gaussian_noise:      { var_limit: [5, 30], p: 0.3 }
+    clahe_aug:           { clip_limit: 3.0, p: 0.3 }
+    random_gamma:        { gamma_limit: [80, 120], p: 0.3 }
+    iso_noise:           { p: 0.2 }
+    sharpen:             { p: 0.2 }
+
+  advanced:
+    coarse_dropout:      # Cutout — hides patches, forces generalization
+      max_holes:    8
+      max_height:   30
+      max_width:    30
+      p:            0.3
+    channel_shuffle:     { p: 0.15 }
+
+# ── Dataset Splitting ─────────────────────────────────────────
+split:
+  test_size:   0.10               # 10% for final held-out test
+  val_size:    0.20               # 20% of remaining for validation
+  # Stratified → preserves class ratios in every split
+  stratify:    true
+  random_seed: 42
+  # Cross-validation folds (used during training)
+  n_folds:     5
+
+# ── Dataset Balancing ─────────────────────────────────────────
+balancing:
+  strategy: "oversample"          # options: oversample | undersample | weighted_loss | none
+  # Oversampling = repeat minority class images (before augmentation)
+  # Works at dataset-level, not augmentation-level
+  random_seed: 42
+
+# ── Normalization (applied LAST before tensor conversion) ─────
+normalization:
+  # ImageNet statistics — required for pretrained EfficientNet/ViT
+  mean: [0.485, 0.456, 0.406]
+  std:  [0.229, 0.224, 0.225]
+
+# ── Output Verification ───────────────────────────────────────
+verification:
+  save_sample_grid: true          # Save a visual grid of processed samples
+  n_samples:        16
+  check_pixel_stats: true         # Log per-split mean/std after processing

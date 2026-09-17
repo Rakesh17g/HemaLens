@@ -1,0 +1,34 @@
+# ALL Detection System — Python Dependencies
+# ============================================
+# Install (CPU):  pip install -r requirements.txt
+# Install (GPU):  pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
+
+# ── Core ML ──────────────────────────────────────────────────────────────────
+torch>=2.1.0
+torchvision>=0.16.0
+numpy>=1.24,<2.0          # numpy 2.x has breaking API changes
+scikit-learn>=1.3
+
+# ── Image processing ─────────────────────────────────────────────────────────
+Pillow>=10.0
+opencv-python-headless>=4.8   # headless = no GUI deps (Docker-safe)
+
+# ── Visualization ─────────────────────────────────────────────────────────────
+matplotlib>=3.7
+plotly>=5.18                  # interactive Streamlit charts
+
+# ── Streamlit dashboard ───────────────────────────────────────────────────────
+streamlit>=1.35               # multi-page web interface
+
+# ── PDF report generation ─────────────────────────────────────────────────────
+reportlab>=4.0                # vector-quality A4 PDF engine
+
+# ── Data & training utilities ─────────────────────────────────────────────────
+tqdm>=4.66
+pyyaml>=6.0
+tensorboard>=2.14
+albumentations>=1.3           # medical image augmentation
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=7.4
+pytest-cov>=4.1
