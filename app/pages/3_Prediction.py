@@ -250,7 +250,9 @@ with right_col:
             number={"suffix": "%", "font": {"size": 26, "color": pred_color}},
             gauge={
                 "axis": {
-                    "range": [0, 100], "tickcolor": "#555", "tickfont": {"color": "#555"}
+                    "range": [0, 100],
+                    "tickcolor": "#555",
+                    "tickfont": {"color": "#555"},
                 },
                 "bar": {"color": pred_color},
                 "bgcolor": "#141414",

@@ -15,7 +15,6 @@ We also compute optimal operating threshold from the ROC curve
 (Youden's J statistic: max(sensitivity + specificity - 1)).
 """
 
-
 import numpy as np
 import torch
 from sklearn.metrics import (

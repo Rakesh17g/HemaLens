@@ -88,10 +88,10 @@ def load_model(checkpoint_path: str, device_name: str = "cpu"):
         model.eval()
         logger.info("Model loaded from %s on %s", checkpoint_path, device)
         return model, device
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.error("Failed to load checkpoint %s: %s", checkpoint_path, exc)
         load_model.clear()
-        return None, device
+        raise RuntimeError(f"Corrupted or invalid checkpoint at {checkpoint_path}") from exc
 
 
 def get_device() -> str:
@@ -117,7 +117,8 @@ def preprocess_image(
       original_rgb : (H,W,3)   uint8   for display
     """
     img_res = pil_image.convert("RGB").resize(
-        (target_size, target_size), Image.BILINEAR  # type: ignore
+        (target_size, target_size),
+        Image.BILINEAR,  # type: ignore
     )
     orig = np.array(img_res, dtype=np.uint8)
     tensor = tvF.to_tensor(img_res)
@@ -220,6 +221,7 @@ def generate_pdf_bytes(
     from src.reports.report_generator import MedicalReportData, MedicalReportGenerator
 
     try:
+
         class _Proxy:
             pass
 

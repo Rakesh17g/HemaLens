@@ -166,7 +166,9 @@ if uploaded is not None:
                 "title_font_size": 10,
             },
             yaxis={
-                "gridcolor": "rgba(255,255,255,0.04)", "title": "Count", "title_font_size": 10
+                "gridcolor": "rgba(255,255,255,0.04)",
+                "title": "Count",
+                "title_font_size": 10,
             },
             height=180,
         )

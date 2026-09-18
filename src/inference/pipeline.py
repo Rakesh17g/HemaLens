@@ -171,7 +171,8 @@ def preprocess(
       original_rgb : (H,W,3)   uint8    denormalised, for display
     """
     img_res = pil_image.convert("RGB").resize(
-        (target_size, target_size), Image.BILINEAR  # type: ignore
+        (target_size, target_size),
+        Image.BILINEAR,  # type: ignore
     )
     orig_rgb = np.array(img_res, dtype=np.uint8)
     tensor = tvF.to_tensor(img_res)

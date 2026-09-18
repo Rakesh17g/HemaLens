@@ -457,8 +457,9 @@ class ConfidenceEstimator:
 
         # ── Step 1: deterministic probability ────────────────────────────────
         model.eval()
-        with torch.no_grad(), torch.cuda.amp.autocast(
-            enabled=(self.use_amp and device.type == "cuda")
+        with (
+            torch.no_grad(),
+            torch.cuda.amp.autocast(enabled=(self.use_amp and device.type == "cuda")),
         ):
             logit = model(image.to(device))
             prob = float(torch.sigmoid(logit).item())

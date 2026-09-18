@@ -29,7 +29,6 @@ Custom Head design:
     - Binary output (1 neuron): used with BCEWithLogitsLoss / Focal Loss
 """
 
-
 import torch
 import torchvision.models as tv_models
 from torch import nn

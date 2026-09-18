@@ -30,7 +30,6 @@ WHY LABEL SMOOTHING:
   Label smoothing replaces hard labels {0,1} with soft {ε/2, 1-ε/2}.
 """
 
-
 import torch
 import torch.nn.functional as F
 from torch import nn

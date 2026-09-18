@@ -45,7 +45,10 @@ def _layout(h=360):
         "font": {"color": SUB, "family": "Inter", "size": 11},
         "margin": {"l": 15, "r": 15, "t": 40, "b": 15},
         "legend": {
-            "bgcolor": CARD, "bordercolor": BDR, "borderwidth": 1, "font": {"color": TEXT}
+            "bgcolor": CARD,
+            "bordercolor": BDR,
+            "borderwidth": 1,
+            "font": {"color": TEXT},
         },
         "height": h,
     }
@@ -197,7 +200,8 @@ with tab_roc:
     fig.update_layout(
         **_layout(380),
         title={
-            "text": "Receiver Operating Characteristic", "font": {"color": SUB, "size": 12}
+            "text": "Receiver Operating Characteristic",
+            "font": {"color": SUB, "size": 12},
         },
         xaxis={"title": "False Positive Rate", "gridcolor": GRID, "range": [0, 1]},
         yaxis={"title": "True Positive Rate", "gridcolor": GRID, "range": [0, 1.02]},
@@ -334,7 +338,8 @@ with tab_thr:
         fig.update_layout(
             **_layout(380),
             title={
-                "text": "Metric vs Decision Threshold", "font": {"color": SUB, "size": 12}
+                "text": "Metric vs Decision Threshold",
+                "font": {"color": SUB, "size": 12},
             },
             xaxis={"title": "Threshold", "gridcolor": GRID, "range": [0, 1]},
             yaxis={"title": "Score", "gridcolor": GRID, "range": [0, 1.02]},

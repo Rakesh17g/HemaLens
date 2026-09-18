@@ -106,7 +106,7 @@ with st.sidebar:
     st.markdown(
         f'<div style="font-size:0.7rem;color:#888;padding:2px 0 6px;">'
         f'Checkpoint: <code style="color:#a5f9ef;">'
-        f'{__import__("pathlib").Path(CHECKPOINT_PATH).name}</code></div>',
+        f"{__import__('pathlib').Path(CHECKPOINT_PATH).name}</code></div>",
         unsafe_allow_html=True,
     )
     # Ensure session state always holds the absolute path (self-healing)
