@@ -14,17 +14,7 @@ run_gradcam()         @st.cache_data — gradcam only (legacy, unchanged)
 init_session()        seed session_state defaults
 has_image()           True if image bytes in session state
 checkpoint_exists()   True if checkpoint file exists on disk
-
-Why run_full_pipeline() instead of two separate calls?
--------------------------------------------------------
-The old approach called load_model() + preprocess_image() twice — once
-inside run_prediction() and once inside run_gradcam(). Even though
-load_model() is @st.cache_resource, the preprocessing happened twice.
-
-run_full_pipeline() delegates to InferencePipeline which preprocesses
-once and reuses the tensor for both ConfidenceEstimator and GradCAM.
-The individual run_prediction() and run_gradcam() functions are kept
-as-is for the existing per-feature pages.
+CHECKPOINT_PATH       Absolute path to the bundled checkpoint (str)
 """
 
 from __future__ import annotations
@@ -41,7 +31,18 @@ import torch
 import torchvision.transforms.functional as tvF
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[2]
+# ─────────────────────────────────────────────────────────────────────────────
+# Paths — resolved from __file__ so they work from ANY working directory,
+# including Streamlit Cloud's /mount/src/<repo>/ working directory.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Project root: two levels up from app/components/model_utils.py
+ROOT: Path = Path(__file__).resolve().parents[2]
+
+# Absolute path to the trained checkpoint committed into the repository.
+# This is the canonical checkpoint; everything seeds with this value.
+CHECKPOINT_PATH: str = str(ROOT / "models" / "checkpoints" / "efficientnet_b0_best.pth")
+
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -62,33 +63,35 @@ def load_model(checkpoint_path: str, device_name: str = "cpu"):
     Load EfficientNet-B0 from a checkpoint.
     Cached across ALL pages for the lifetime of the server process.
 
+    The checkpoint must be a dict with key 'model_state_dict' (wrapped format
+    saved by CheckpointManager) OR a bare state_dict.
+
     Returns
     -------
-    (model, device)  or  (None, device) if checkpoint not found.
+    (model, device)  — always returns a pair; model is None on failure.
     """
     from src.models.efficientnet import build_model
 
     device = torch.device(device_name)
-    
-    # Resolve relative paths against ROOT to support running from any directory
-    if not os.path.isabs(checkpoint_path):
-        resolved_path = ROOT / checkpoint_path
-        if resolved_path.exists():
-            checkpoint_path = str(resolved_path)
 
-    if not os.path.exists(checkpoint_path):
-        load_model.clear()
+    if not os.path.isfile(checkpoint_path):
+        logger.error("Checkpoint not found at: %s", checkpoint_path)
         return None, device
 
-    model = build_model(pretrained=False, device=device)
-    state = torch.load(checkpoint_path, map_location=device)
-    if "model_state_dict" in state:
-        model.load_state_dict(state["model_state_dict"])
-    else:
-        model.load_state_dict(state)
-    model.eval()
-    logger.info(f"Model loaded from {checkpoint_path} on {device}")
-    return model, device
+    try:
+        model = build_model(pretrained=False, device=device)
+        state = torch.load(checkpoint_path, map_location=device, weights_only=False)
+        if "model_state_dict" in state:
+            model.load_state_dict(state["model_state_dict"])
+        else:
+            model.load_state_dict(state)
+        model.eval()
+        logger.info("Model loaded from %s on %s", checkpoint_path, device)
+        return model, device
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to load checkpoint %s: %s", checkpoint_path, exc)
+        load_model.clear()
+        return None, device
 
 
 def get_device() -> str:
@@ -145,12 +148,7 @@ def run_full_pipeline(
 
     Returns
     -------
-    Flat dict with all fields from PipelineResult:
-      probability, prediction, confidence, risk_level, clinical_note,
-      boundary_score, entropy_score, mcdrop_score, mcdrop_passes,
-      threshold, weights, gradcam_method, gradcam_layer, image_size,
-      original_rgb (ndarray), heatmap (ndarray), colormap (ndarray),
-      overlay (ndarray), filename.
+    Flat dict with all fields from PipelineResult.
     On failure: {"error": str}
     """
     from src.inference.pipeline import InferencePipeline
@@ -198,11 +196,11 @@ def run_full_pipeline(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PDF bytes  (@st.cache_data)
+# PDF bytes
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-# @st.cache_data(show_spinner=False)  # DO NOT USE CACHE FOR PDF GENERATION; causes zombie failures
+# @st.cache_data(show_spinner=False)  # DO NOT CACHE — causes zombie failures
 def generate_pdf_bytes(
     pipeline_result_dict: dict,
     patient_id: str = "ANON",
@@ -214,9 +212,6 @@ def generate_pdf_bytes(
     """
     Generate PDF bytes from a pipeline result dict.
 
-    Wraps MedicalReportGenerator.generate_bytes() so the PDF is
-    cached per (result + metadata) — no PDF is regenerated on rerun.
-
     Returns
     -------
     bytes : Raw PDF content for st.download_button.
@@ -225,8 +220,6 @@ def generate_pdf_bytes(
     from src.reports.report_generator import MedicalReportData, MedicalReportGenerator
 
     try:
-        # Reconstruct a minimal PipelineResult-like namespace from the dict
-        # to use from_pipeline_result() without importing the dataclass
         class _Proxy:
             pass
 
@@ -242,7 +235,7 @@ def generate_pdf_bytes(
             analyst=analyst,
             model_version=model_version,
         )
-        gen = MedicalReportGenerator(output_dir="/tmp")  # dir unused for bytes
+        gen = MedicalReportGenerator(output_dir="/tmp")
         return gen.generate_bytes(data)
 
     except Exception as exc:  # noqa: BLE001
@@ -337,14 +330,16 @@ def init_session() -> None:
     defaults = {
         "uploaded_bytes": None,
         "uploaded_filename": None,
-        "checkpoint_path": "models/checkpoints/efficientnet_b0_best.pth",
+        # Seed with the absolute ROOT-resolved path so it works
+        # on any machine/deployment without user intervention.
+        "checkpoint_path": CHECKPOINT_PATH,
         "threshold": 0.50,
         "mc_passes": 0,
         "gradcam_layer": 8,
         "gradcam_method": "gradcam",
         "prediction_result": None,
         "gradcam_result": None,
-        "pipeline_result": None,  # ← new: full pipeline result
+        "pipeline_result": None,
         "eval_metrics": None,
         # report metadata
         "patient_id": "ANON",
@@ -371,11 +366,5 @@ def has_pipeline_result() -> bool:
 
 
 def checkpoint_exists() -> bool:
-    path = st.session_state.get("checkpoint_path", "")
-    if not path:
-        return False
-    if not os.path.isabs(path):
-        resolved = ROOT / path
-        if resolved.exists():
-            return True
-    return os.path.exists(path)
+    """Return True if the bundled checkpoint file exists on disk."""
+    return os.path.isfile(CHECKPOINT_PATH)

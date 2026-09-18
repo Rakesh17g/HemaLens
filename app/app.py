@@ -100,48 +100,19 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    import os
-    from pathlib import Path
-    ckpt_dir = Path(__file__).resolve().parents[1] / "models" / "checkpoints"
-    
-    # Auto-download missing checkpoint in cloud environments (e.g. Streamlit Cloud)
-    expected_ckpt = ckpt_dir / "efficientnet_b0_best.pth"
-    if not expected_ckpt.exists():
-        try:
-            from huggingface_hub import hf_hub_download
-            with st.spinner("Downloading AI model checkpoint..."):
-                ckpt_dir.mkdir(parents=True, exist_ok=True)
-                hf_hub_download(
-                    repo_id="rakesh17g/all-detection-model",
-                    filename="efficientnet_b0_best.pth",
-                    local_dir=str(ckpt_dir)
-                )
-        except Exception:
-            pass  # Fallback gracefully if HF Hub is unreachable or library missing
+    from app.components.model_utils import CHECKPOINT_PATH
 
-    available_ckpts = []
-    if ckpt_dir.exists():
-        available_ckpts = [f"models/checkpoints/{f.name}" for f in ckpt_dir.iterdir() if f.suffix in ('.pth', '.pt')]
-    
-    # Fallback if the user's session state got corrupted or they typed an invalid path
-    current_ckpt = st.session_state.get("checkpoint_path", "")
-    if current_ckpt not in available_ckpts and available_ckpts:
-        st.session_state["checkpoint_path"] = available_ckpts[0]
+    # Display the resolved checkpoint name (read-only — fixed by deployment)
+    st.markdown(
+        f'<div style="font-size:0.7rem;color:#888;padding:2px 0 6px;">'
+        f'Checkpoint: <code style="color:#a5f9ef;">'
+        f'{__import__("pathlib").Path(CHECKPOINT_PATH).name}</code></div>',
+        unsafe_allow_html=True,
+    )
+    # Ensure session state always holds the absolute path (self-healing)
+    if st.session_state.get("checkpoint_path") != CHECKPOINT_PATH:
+        st.session_state["checkpoint_path"] = CHECKPOINT_PATH
 
-    if available_ckpts:
-        st.selectbox(
-            "Checkpoint", 
-            options=available_ckpts,
-            key="checkpoint_path", 
-            label_visibility="collapsed"
-        )
-    else:
-        st.text_input(
-            "Checkpoint",
-            key="checkpoint_path",
-            label_visibility="collapsed",
-            placeholder="Path to .pth file",
-        )
     st.slider(
         "Decision threshold",
         0.20,

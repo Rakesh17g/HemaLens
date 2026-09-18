@@ -32,9 +32,6 @@ ENV/
 
 # Project specific
 logs/
-*.pth
-*.pt
-models/checkpoints/
 data/
 *.npz
 
