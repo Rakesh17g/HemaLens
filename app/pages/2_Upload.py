@@ -131,9 +131,10 @@ if uploaded is not None:
         fig = go.Figure()
         COLORS = {"R": "#dc443c", "G": "#8fcdb7", "B": "#a5f9ef"}
         for i, (ch, col) in enumerate(COLORS.items()):
-            # Cast to float64 to bypass any numpy 2.x integer casting/overflow bugs
-            ch_data = orig_rgb[:, :, i].ravel().astype(np.float64)
-            counts, bins = np.histogram(ch_data, bins=64, range=(0.0, 256.0))
+            # Use np.bincount to completely bypass numpy 2.x histogram integer bugs
+            ch_data = orig_rgb[:, :, i].ravel()
+            counts = np.bincount(ch_data, minlength=256).reshape(64, 4).sum(axis=1)
+            bins = np.linspace(0, 256, 65)
             fig.add_trace(
                 go.Scatter(
                     x=bins[:-1],
