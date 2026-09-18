@@ -99,7 +99,9 @@ if uploaded is not None:
         fig = go.Figure()
         COLORS = {"R": "#dc443c", "G": "#8fcdb7", "B": "#a5f9ef"}
         for i, (ch, col) in enumerate(COLORS.items()):
-            counts, bins = np.histogram(orig_rgb[:, :, i].ravel(), bins=64, range=(0, 256))
+            # Cast to float64 to bypass any numpy 2.x integer casting/overflow bugs
+            ch_data = orig_rgb[:, :, i].ravel().astype(np.float64)
+            counts, bins = np.histogram(ch_data, bins=64, range=(0.0, 256.0))
             fig.add_trace(go.Scatter(
                 x=bins[:-1], y=counts, mode="lines",
                 name=f"{ch} channel", line=dict(color=col, width=1.5),
