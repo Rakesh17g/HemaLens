@@ -100,12 +100,32 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    st.text_input(
-        "Checkpoint",
-        key="checkpoint_path",
-        label_visibility="collapsed",
-        placeholder="Path to .pth file",
-    )
+    import os
+    from pathlib import Path
+    ckpt_dir = Path(__file__).resolve().parents[1] / "models" / "checkpoints"
+    available_ckpts = []
+    if ckpt_dir.exists():
+        available_ckpts = [f"models/checkpoints/{f.name}" for f in ckpt_dir.iterdir() if f.suffix in ('.pth', '.pt')]
+    
+    # Fallback if the user's session state got corrupted or they typed an invalid path
+    current_ckpt = st.session_state.get("checkpoint_path", "")
+    if current_ckpt not in available_ckpts and available_ckpts:
+        st.session_state["checkpoint_path"] = available_ckpts[0]
+
+    if available_ckpts:
+        st.selectbox(
+            "Checkpoint", 
+            options=available_ckpts,
+            key="checkpoint_path", 
+            label_visibility="collapsed"
+        )
+    else:
+        st.text_input(
+            "Checkpoint",
+            key="checkpoint_path",
+            label_visibility="collapsed",
+            placeholder="Path to .pth file",
+        )
     st.slider(
         "Decision threshold",
         0.20,
