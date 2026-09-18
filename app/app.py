@@ -103,6 +103,22 @@ with st.sidebar:
     import os
     from pathlib import Path
     ckpt_dir = Path(__file__).resolve().parents[1] / "models" / "checkpoints"
+    
+    # Auto-download missing checkpoint in cloud environments (e.g. Streamlit Cloud)
+    expected_ckpt = ckpt_dir / "efficientnet_b0_best.pth"
+    if not expected_ckpt.exists():
+        try:
+            from huggingface_hub import hf_hub_download
+            with st.spinner("Downloading AI model checkpoint..."):
+                ckpt_dir.mkdir(parents=True, exist_ok=True)
+                hf_hub_download(
+                    repo_id="rakesh17g/all-detection-model",
+                    filename="efficientnet_b0_best.pth",
+                    local_dir=str(ckpt_dir)
+                )
+        except Exception:
+            pass  # Fallback gracefully if HF Hub is unreachable or library missing
+
     available_ckpts = []
     if ckpt_dir.exists():
         available_ckpts = [f"models/checkpoints/{f.name}" for f in ckpt_dir.iterdir() if f.suffix in ('.pth', '.pt')]
