@@ -69,6 +69,13 @@ def load_model(checkpoint_path: str, device_name: str = "cpu"):
     from src.models.efficientnet import build_model
 
     device = torch.device(device_name)
+    
+    # Resolve relative paths against ROOT to support running from any directory
+    if not os.path.isabs(checkpoint_path):
+        resolved_path = ROOT / checkpoint_path
+        if resolved_path.exists():
+            checkpoint_path = str(resolved_path)
+
     if not os.path.exists(checkpoint_path):
         return None, device
 
@@ -360,4 +367,11 @@ def has_pipeline_result() -> bool:
 
 
 def checkpoint_exists() -> bool:
-    return os.path.exists(st.session_state.get("checkpoint_path", ""))
+    path = st.session_state.get("checkpoint_path", "")
+    if not path:
+        return False
+    if not os.path.isabs(path):
+        resolved = ROOT / path
+        if resolved.exists():
+            return True
+    return os.path.exists(path)

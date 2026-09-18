@@ -100,25 +100,23 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    st.session_state["checkpoint_path"] = st.text_input(
+    st.text_input(
         "Checkpoint",
-        value=st.session_state["checkpoint_path"],
+        key="checkpoint_path",
         label_visibility="collapsed",
         placeholder="Path to .pth file",
     )
-    st.session_state["threshold"] = st.slider(
+    st.slider(
         "Decision threshold",
         0.20,
         0.80,
-        value=float(st.session_state["threshold"]),
+        key="threshold",
         step=0.01,
     )
-    st.session_state["mc_passes"] = st.selectbox(
+    st.selectbox(
         "MC Dropout passes",
         [0, 10, 20, 50],
-        index=[0, 10, 20, 50].index(st.session_state["mc_passes"])
-        if st.session_state["mc_passes"] in [0, 10, 20, 50]
-        else 0,
+        key="mc_passes",
     )
 
     st.markdown('<hr class="hl-nav-divider">', unsafe_allow_html=True)
@@ -126,24 +124,24 @@ with st.sidebar:
         '<div class="hl-nav-section" style="margin-left:0.5rem;font-size:0.65rem;color:#888;letter-spacing:0.1em;text-transform:uppercase;">Report Metadata</div>',
         unsafe_allow_html=True,
     )
-    st.session_state["patient_id"] = st.text_input(
+    st.text_input(
         "Patient ID",
-        value=st.session_state.get("patient_id", "ANON"),
+        key="patient_id",
         label_visibility="collapsed",
     )
-    st.session_state["sample_id"] = st.text_input(
+    st.text_input(
         "Sample ID",
-        value=st.session_state.get("sample_id", "N/A"),
+        key="sample_id",
         label_visibility="collapsed",
     )
-    st.session_state["analyst"] = st.text_input(
+    st.text_input(
         "Analyst",
-        value=st.session_state.get("analyst", "AI Assistant"),
+        key="analyst",
         label_visibility="collapsed",
     )
-    st.session_state["institution"] = st.text_input(
+    st.text_input(
         "Institution",
-        value=st.session_state.get("institution", "HemaLens AI"),
+        key="institution",
         label_visibility="collapsed",
     )
 
