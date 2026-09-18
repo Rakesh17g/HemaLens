@@ -77,6 +77,7 @@ def load_model(checkpoint_path: str, device_name: str = "cpu"):
             checkpoint_path = str(resolved_path)
 
     if not os.path.exists(checkpoint_path):
+        load_model.clear()
         return None, device
 
     model = build_model(pretrained=False, device=device)
@@ -157,6 +158,7 @@ def run_full_pipeline(
     device_name = get_device()
     model, device = load_model(checkpoint, device_name)
     if model is None:
+        run_full_pipeline.clear()
         return {"error": f"Checkpoint not found: {checkpoint}"}
 
     pipeline = InferencePipeline(
@@ -269,6 +271,7 @@ def run_prediction(
     device_name = get_device()
     model, device = load_model(checkpoint, device_name)
     if model is None:
+        run_prediction.clear()
         return {"error": f"Checkpoint not found: {checkpoint}"}
 
     pil = Image.open(io.BytesIO(image_bytes))
@@ -305,6 +308,7 @@ def run_gradcam(
     device_name = get_device()
     model, device = load_model(checkpoint, device_name)
     if model is None:
+        run_gradcam.clear()
         return {"error": f"Checkpoint not found: {checkpoint}"}
 
     pil = Image.open(io.BytesIO(image_bytes))
