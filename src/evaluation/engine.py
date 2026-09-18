@@ -136,7 +136,7 @@ class EvaluationEngine:
 
         logger.info(
             f"EvaluationEngine ready | device={device} | "
-            f"threshold={'auto' if self.threshold is None else self.threshold:.3f}"
+            f"threshold={'auto' if self.threshold is None else f'{self.threshold:.3f}'}"
         )
 
     # ── Core: inference → metrics ─────────────────────────────────────────────

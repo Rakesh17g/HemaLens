@@ -407,7 +407,7 @@ if raw_bytes:
                     )
 
                     if pdf_bytes:
-                        fname = f"HemaLens_{result['prediction']}_{risk}_{result['filename'].rsplit('.', 1)[0]}.pdf"
+                        fname = "hemalens_medical_report.pdf"
                         st.download_button(
                             label="Download PDF Report",
                             data=pdf_bytes,
