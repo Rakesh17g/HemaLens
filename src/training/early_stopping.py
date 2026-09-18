@@ -12,11 +12,8 @@ Design notes:
 
 import copy
 import logging
-from typing import Optional
 
-import torch
-import torch.nn as nn
-
+from torch import nn
 
 logger = logging.getLogger("ALLTrainer")
 
@@ -36,26 +33,26 @@ class EarlyStopping:
 
     def __init__(
         self,
-        monitor:      str   = "val_auc",
-        patience:     int   = 12,
-        min_delta:    float = 1e-4,
-        mode:         str   = "max",
-        restore_best: bool  = True,
-        verbose:      bool  = True,
+        monitor: str = "val_auc",
+        patience: int = 12,
+        min_delta: float = 1e-4,
+        mode: str = "max",
+        restore_best: bool = True,
+        verbose: bool = True,
     ) -> None:
-        self.monitor      = monitor
-        self.patience     = patience
-        self.min_delta    = min_delta
-        self.mode         = mode
+        self.monitor = monitor
+        self.patience = patience
+        self.min_delta = min_delta
+        self.mode = mode
         self.restore_best = restore_best
-        self.verbose      = verbose
+        self.verbose = verbose
 
         # State
-        self.best_value:    float               = float("-inf") if mode == "max" else float("inf")
-        self.best_epoch:    int                 = 0
-        self.best_weights:  Optional[dict]      = None
-        self.counter:       int                 = 0
-        self.should_stop:   bool                = False
+        self.best_value: float = float("-inf") if mode == "max" else float("inf")
+        self.best_epoch: int = 0
+        self.best_weights: dict | None = None
+        self.counter: int = 0
+        self.should_stop: bool = False
 
     def _is_improvement(self, value: float) -> bool:
         if self.mode == "max":
@@ -81,9 +78,9 @@ class EarlyStopping:
                     f"{self.best_value:.5f} → {value:.5f}  "
                     f"(epoch {self.best_epoch} → {epoch})"
                 )
-            self.best_value   = value
-            self.best_epoch   = epoch
-            self.counter      = 0
+            self.best_value = value
+            self.best_epoch = epoch
+            self.counter = 0
             if self.restore_best:
                 # Deep-copy state dict — detach from GPU to save memory
                 self.best_weights = copy.deepcopy(
@@ -109,14 +106,14 @@ class EarlyStopping:
 
     def state_dict(self) -> dict:
         return {
-            "best_value":  self.best_value,
-            "best_epoch":  self.best_epoch,
-            "counter":     self.counter,
+            "best_value": self.best_value,
+            "best_epoch": self.best_epoch,
+            "counter": self.counter,
             "should_stop": self.should_stop,
         }
 
     def load_state_dict(self, state: dict) -> None:
-        self.best_value  = state["best_value"]
-        self.best_epoch  = state["best_epoch"]
-        self.counter     = state["counter"]
+        self.best_value = state["best_value"]
+        self.best_epoch = state["best_epoch"]
+        self.counter = state["counter"]
         self.should_stop = state["should_stop"]

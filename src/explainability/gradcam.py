@@ -25,13 +25,12 @@ better localisation of multiple instances or small objects. Enabled via
 from __future__ import annotations
 
 import logging
-from typing import Optional, Tuple
 
 import cv2
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 logger = logging.getLogger("ALLGradCAM")
 
@@ -40,11 +39,13 @@ logger = logging.getLogger("ALLGradCAM")
 # Hook container
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class _Hooks:
     """Stores one forward activation tensor and one backward gradient tensor."""
+
     def __init__(self) -> None:
-        self.activation: Optional[torch.Tensor] = None
-        self.gradient:   Optional[torch.Tensor] = None
+        self.activation: torch.Tensor | None = None
+        self.gradient: torch.Tensor | None = None
 
     def forward_hook(self, module, input, output):
         self.activation = output.detach()
@@ -56,6 +57,7 @@ class _Hooks:
 # ─────────────────────────────────────────────────────────────────────────────
 # GradCAM  (main class)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class GradCAM:
     """
@@ -80,37 +82,33 @@ class GradCAM:
 
     def __init__(
         self,
-        model:        nn.Module,
-        target_layer: int   = 8,   # features[8] — last MBConv block
-        method:       str   = "gradcam",
-        device:       Optional[torch.device] = None,
+        model: nn.Module,
+        target_layer: int = 8,  # features[8] — last MBConv block
+        method: str = "gradcam",
+        device: torch.device | None = None,
     ) -> None:
-        self.model        = model
-        self.device       = device or next(model.parameters()).device
-        self.method       = method.lower()
-        self._hooks       = _Hooks()
-        self._fwd_handle  = None
-        self._bwd_handle  = None
+        self.model = model
+        self.device = device or next(model.parameters()).device
+        self.method = method.lower()
+        self._hooks = _Hooks()
+        self._fwd_handle = None
+        self._bwd_handle = None
 
         # Resolve target layer
         try:
-            self._target = model.features[target_layer]
+            self._target = model.features[target_layer]  # type: ignore
         except (AttributeError, IndexError):
             raise ValueError(
                 f"model.features[{target_layer}] not found.  "
                 "Pass a model with a .features Sequential attribute."
             )
-        logger.info(
-            f"GradCAM ready | layer=features[{target_layer}] | method={method}"
-        )
+        logger.info(f"GradCAM ready | layer=features[{target_layer}] | method={method}")
 
     # ── Registration / cleanup ────────────────────────────────────────────────
 
     def _register(self) -> None:
-        self._fwd_handle = self._target.register_forward_hook(
-            self._hooks.forward_hook
-        )
-        self._bwd_handle = self._target.register_full_backward_hook(
+        self._fwd_handle = self._target.register_forward_hook(self._hooks.forward_hook)  # type: ignore
+        self._bwd_handle = self._target.register_full_backward_hook(  # type: ignore
             self._hooks.backward_hook
         )
 
@@ -124,9 +122,9 @@ class GradCAM:
 
     def __call__(
         self,
-        image:        torch.Tensor,   # (1,C,H,W) or (C,H,W)
-        target_class: int = 1,        # 1 = ALL+, 0 = Healthy
-    ) -> "GradCAMResult":
+        image: torch.Tensor,  # (1,C,H,W) or (C,H,W)
+        target_class: int = 1,  # 1 = ALL+, 0 = Healthy
+    ) -> GradCAMResult:
         """
         Compute Grad-CAM heatmap for *image*.
 
@@ -152,23 +150,23 @@ class GradCAM:
         # register_full_backward_hook on model.features[target_layer] only fires
         # when at least one param in that layer participates in the gradient
         # graph. Fix: snapshot → enable → backward → restore.
-        _saved_grad = {id(p): p.requires_grad for p in self._target.parameters()}
-        for p in self._target.parameters():
+        _saved_grad = {id(p): p.requires_grad for p in self._target.parameters()}  # type: ignore
+        for p in self._target.parameters():  # type: ignore
             p.requires_grad_(True)
 
         try:
             # ── Forward (needs full gradient graph — NO torch.no_grad) ────────
-            image = image.detach()       # don't compute grad w.r.t. input
-            logit = self.model(image)    # (1, 1)
-            prob  = float(torch.sigmoid(logit).item())
+            image = image.detach()  # don't compute grad w.r.t. input
+            logit = self.model(image)  # (1, 1)
+            prob = float(torch.sigmoid(logit).item())
 
             # ── Backward on the target class score ───────────────────────────
             self.model.zero_grad()
-            score = logit[0, 0]          # scalar
+            score = logit[0, 0]  # scalar
             score.backward()
 
-            act  = self._hooks.activation   # (1, C, h, w)
-            grad = self._hooks.gradient     # (1, C, h, w)
+            act = self._hooks.activation  # (1, C, h, w)
+            grad = self._hooks.gradient  # (1, C, h, w)
 
             if act is None or grad is None:
                 raise RuntimeError("Hooks did not capture tensors.")
@@ -180,11 +178,11 @@ class GradCAM:
 
             elif self.method == "gradcam++":
                 # α = grad² / (2·grad² + act·grad³)
-                grad2   = grad ** 2
-                grad3   = grad ** 3
-                denom   = 2 * grad2 + (act * grad3).sum(dim=(2, 3), keepdim=True)
-                denom   = torch.where(denom != 0, denom, torch.ones_like(denom))
-                alpha   = grad2 / denom
+                grad2 = grad**2
+                grad3 = grad**3
+                denom = 2 * grad2 + (act * grad3).sum(dim=(2, 3), keepdim=True)
+                denom = torch.where(denom != 0, denom, torch.ones_like(denom))
+                alpha = grad2 / denom
                 weights = (alpha * F.relu(grad)).sum(dim=(2, 3), keepdim=True)
 
             else:
@@ -192,14 +190,14 @@ class GradCAM:
 
             # ── Weighted activation sum ───────────────────────────────────────
             cam = (weights * act).sum(dim=1, keepdim=True)  # (1, 1, h, w)
-            cam = F.relu(cam)                                # clip negatives
+            cam = F.relu(cam)  # clip negatives
 
             # ── Resize to input resolution ───────────────────────────────────
             H, W = image.shape[2], image.shape[3]
             cam_up = F.interpolate(
                 cam, size=(H, W), mode="bilinear", align_corners=False
-            )                                                # (1, 1, H, W)
-            cam_np = cam_up.squeeze().cpu().numpy()          # (H, W)
+            )  # (1, 1, H, W)
+            cam_np = cam_up.squeeze().cpu().numpy()  # (H, W)
 
             # ── Normalise to [0, 1] ───────────────────────────────────────────
             cam_min, cam_max = cam_np.min(), cam_np.max()
@@ -211,32 +209,33 @@ class GradCAM:
         finally:
             self._remove()
             # Restore original requires_grad state (keep backbone frozen)
-            for p in self._target.parameters():
+            for p in self._target.parameters():  # type: ignore
                 p.requires_grad_(_saved_grad.get(id(p), False))
             self.model.zero_grad()
 
         # ── Colour heatmap (MAGMA colormap — perceptually uniform) ────────────
         cam_uint8 = (cam_np * 255).astype(np.uint8)
-        colormap  = cv2.applyColorMap(cam_uint8, cv2.COLORMAP_MAGMA)   # BGR
+        colormap = cv2.applyColorMap(cam_uint8, cv2.COLORMAP_MAGMA)  # BGR
 
         # ── Overlay on denormalised original image ────────────────────────────
-        orig_np = _denorm_to_uint8(image.squeeze(0).cpu())              # (H,W,3) RGB
+        orig_np = _denorm_to_uint8(image.squeeze(0).cpu())  # (H,W,3) RGB
         orig_bgr = cv2.cvtColor(orig_np, cv2.COLOR_RGB2BGR)
-        overlay  = cv2.addWeighted(orig_bgr, 0.50, colormap, 0.50, 0)  # BGR
+        overlay = cv2.addWeighted(orig_bgr, 0.50, colormap, 0.50, 0)  # BGR
 
         return GradCAMResult(
-            heatmap    = cam_np,
-            colormap   = cv2.cvtColor(colormap, cv2.COLOR_BGR2RGB),
-            overlay    = cv2.cvtColor(overlay,  cv2.COLOR_BGR2RGB),
-            original   = orig_np,
-            probability = prob,
-            method     = self.method,
+            heatmap=cam_np,
+            colormap=cv2.cvtColor(colormap, cv2.COLOR_BGR2RGB),
+            overlay=cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB),
+            original=orig_np,
+            probability=prob,
+            method=self.method,
         )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Result container
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class GradCAMResult:
     """
@@ -254,23 +253,24 @@ class GradCAMResult:
 
     def __init__(
         self,
-        heatmap:     np.ndarray,
-        colormap:    np.ndarray,
-        overlay:     np.ndarray,
-        original:    np.ndarray,
+        heatmap: np.ndarray,
+        colormap: np.ndarray,
+        overlay: np.ndarray,
+        original: np.ndarray,
         probability: float,
-        method:      str,
+        method: str,
     ) -> None:
-        self.heatmap     = heatmap
-        self.colormap    = colormap
-        self.overlay     = overlay
-        self.original    = original
+        self.heatmap = heatmap
+        self.colormap = colormap
+        self.overlay = overlay
+        self.original = original
         self.probability = probability
-        self.method      = method
+        self.method = method
 
     def save(self, path: str) -> str:
         """Save the overlay image to disk. Returns the path."""
         import os
+
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         rgb = self.overlay
         bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
@@ -286,15 +286,18 @@ class GradCAMResult:
         Dict mapping name → path.
         """
         import os
-        os.makedirs(os.path.dirname(os.path.abspath(prefix + "_x.png")) or ".", exist_ok=True)
+
+        os.makedirs(
+            os.path.dirname(os.path.abspath(prefix + "_x.png")) or ".", exist_ok=True
+        )
         paths = {}
         for name, arr in [
-            ("original",  self.original),
-            ("heatmap",   _float_to_rgb(self.heatmap)),
-            ("colormap",  self.colormap),
-            ("overlay",   self.overlay),
+            ("original", self.original),
+            ("heatmap", _float_to_rgb(self.heatmap)),
+            ("colormap", self.colormap),
+            ("overlay", self.overlay),
         ]:
-            p   = f"{prefix}_{name}.png"
+            p = f"{prefix}_{name}.png"
             bgr = cv2.cvtColor(arr.astype(np.uint8), cv2.COLOR_RGB2BGR)
             cv2.imwrite(p, bgr)
             paths[name] = p
@@ -306,15 +309,15 @@ class GradCAMResult:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-_IMAGENET_STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+_IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
 def _denorm_to_uint8(tensor: torch.Tensor) -> np.ndarray:
     """
     Reverse ImageNet normalisation and convert (C,H,W) tensor → (H,W,3) uint8.
     """
-    img = tensor.cpu().numpy().transpose(1, 2, 0)   # (H, W, C)
-    img = img * _IMAGENET_STD + _IMAGENET_MEAN       # denormalise
+    img = tensor.cpu().numpy().transpose(1, 2, 0)  # (H, W, C)
+    img = img * _IMAGENET_STD + _IMAGENET_MEAN  # denormalise
     img = np.clip(img * 255, 0, 255).astype(np.uint8)
     return img
 

@@ -15,29 +15,29 @@ We also compute optimal operating threshold from the ROC curve
 (Youden's J statistic: max(sensitivity + specificity - 1)).
 """
 
-from typing import Dict, Tuple, Optional
+
 import numpy as np
 import torch
 from sklearn.metrics import (
-    roc_auc_score,
-    f1_score,
     accuracy_score,
-    confusion_matrix,
-    matthews_corrcoef,
     average_precision_score,
+    confusion_matrix,
+    f1_score,
+    matthews_corrcoef,
+    roc_auc_score,
     roc_curve,
 )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Core Metric Computation
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def compute_metrics(
-    y_true:    np.ndarray,       # (N,) int  {0, 1}
-    y_prob:    np.ndarray,       # (N,) float probabilities [0, 1]
+    y_true: np.ndarray,  # (N,) int  {0, 1}
+    y_prob: np.ndarray,  # (N,) float probabilities [0, 1]
     threshold: float = 0.50,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Compute the full medical-grade metric suite.
 
@@ -54,10 +54,10 @@ def compute_metrics(
     # ── Confusion Matrix components ───────────────────────────────────
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
 
-    sensitivity = tp / (tp + fn + 1e-8)   # True Positive Rate
-    specificity = tn / (tn + fp + 1e-8)   # True Negative Rate
-    precision   = tp / (tp + fp + 1e-8)   # Positive Predictive Value
-    npv         = tn / (tn + fn + 1e-8)   # Negative Predictive Value
+    sensitivity = tp / (tp + fn + 1e-8)  # True Positive Rate
+    specificity = tn / (tn + fp + 1e-8)  # True Negative Rate
+    precision = tp / (tp + fp + 1e-8)  # Positive Predictive Value
+    npv = tn / (tn + fn + 1e-8)  # Negative Predictive Value
 
     # ── Aggregate metrics ─────────────────────────────────────────────
     try:
@@ -70,30 +70,32 @@ def compute_metrics(
     except ValueError:
         auprc = 0.0
 
-    f1  = float(f1_score(y_true, y_pred, zero_division=0))
+    f1 = float(f1_score(y_true, y_pred, zero_division=0))
     acc = float(accuracy_score(y_true, y_pred))
     mcc = float(matthews_corrcoef(y_true, y_pred))
 
     return {
-        "accuracy":    acc,
-        "auc_roc":     auc,
-        "auprc":       auprc,
-        "f1":          f1,
+        "accuracy": acc,
+        "auc_roc": auc,
+        "auprc": auprc,
+        "f1": f1,
         "sensitivity": sensitivity,
         "specificity": specificity,
-        "precision":   precision,
-        "npv":         npv,
-        "mcc":         mcc,
-        "tp": int(tp), "tn": int(tn),
-        "fp": int(fp), "fn": int(fn),
-        "threshold":   threshold,
+        "precision": precision,
+        "npv": npv,
+        "mcc": mcc,
+        "tp": int(tp),
+        "tn": int(tn),
+        "fp": int(fp),
+        "fn": int(fn),
+        "threshold": threshold,
     }
 
 
 def find_optimal_threshold(
     y_true: np.ndarray,
     y_prob: np.ndarray,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Find the operating threshold that maximizes Youden's J statistic.
 
@@ -108,14 +110,15 @@ def find_optimal_threshold(
     """
     fpr, tpr, thresholds = roc_curve(y_true, y_prob, pos_label=1)
     specificity = 1.0 - fpr
-    j_scores    = tpr + specificity - 1.0          # Youden's J
-    best_idx    = int(np.argmax(j_scores))
+    j_scores = tpr + specificity - 1.0  # Youden's J
+    best_idx = int(np.argmax(j_scores))
     return float(thresholds[best_idx]), float(j_scores[best_idx])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Batch Accumulator (used in training loop)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class MetricAccumulator:
     """
@@ -130,26 +133,26 @@ class MetricAccumulator:
         self.reset()
 
     def reset(self) -> None:
-        self._probs:  list = []    # list of numpy float arrays
-        self._labels: list = []    # list of numpy int arrays
-        self._losses: list = []    # list of float loss values
+        self._probs: list = []  # list of numpy float arrays
+        self._labels: list = []  # list of numpy int arrays
+        self._losses: list = []  # list of float loss values
         self._n_batches: int = 0
 
     def update(
         self,
-        logits:  torch.Tensor,   # (B, 1) or (B,) raw logits
-        labels:  torch.Tensor,   # (B,) float labels {0, 1}
-        loss:    float,
+        logits: torch.Tensor,  # (B, 1) or (B,) raw logits
+        labels: torch.Tensor,  # (B,) float labels {0, 1}
+        loss: float,
     ) -> None:
         with torch.no_grad():
             probs = torch.sigmoid(logits.detach().cpu()).view(-1).numpy()
-            lbls  = labels.detach().cpu().view(-1).long().numpy()
+            lbls = labels.detach().cpu().view(-1).long().numpy()
         self._probs.append(probs)
         self._labels.append(lbls)
         self._losses.append(float(loss))
         self._n_batches += 1
 
-    def compute(self, threshold: Optional[float] = None) -> Dict[str, float]:
+    def compute(self, threshold: float | None = None) -> dict[str, float]:
         """
         Compute all metrics over the accumulated epoch.
 
@@ -158,8 +161,8 @@ class MetricAccumulator:
         Returns:
             Dict of metric name → value, plus 'loss' and 'optimal_threshold'.
         """
-        y_prob  = np.concatenate(self._probs)
-        y_true  = np.concatenate(self._labels)
+        y_prob = np.concatenate(self._probs)
+        y_true = np.concatenate(self._labels)
         avg_loss = float(np.mean(self._losses))
 
         # Find optimal threshold if not specified
@@ -167,12 +170,12 @@ class MetricAccumulator:
         t = threshold if threshold is not None else opt_thresh
 
         metrics = compute_metrics(y_true, y_prob, threshold=t)
-        metrics["loss"]               = avg_loss
-        metrics["optimal_threshold"]  = opt_thresh
-        metrics["youden_j"]           = youden_j
+        metrics["loss"] = avg_loss
+        metrics["optimal_threshold"] = opt_thresh
+        metrics["youden_j"] = youden_j
         # Store raw arrays for ROC curve plotting
-        metrics["_y_true"] = y_true
-        metrics["_y_prob"] = y_prob
+        metrics["_y_true"] = y_true  # type: ignore
+        metrics["_y_prob"] = y_prob  # type: ignore
 
         return metrics
 

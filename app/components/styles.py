@@ -606,16 +606,17 @@ code { font-family: var(--mono) !important; font-size: 0.82em; }
 </style>
 """
 
+
 # ─── Sidebar HTML ────────────────────────────────────────────────────────────────
 def _sidebar_nav(active: str = "home") -> str:
     items = [
-        ("home",       "home",       "Home"),
-        ("upload",     "upload",     "Upload"),
+        ("home", "home", "Home"),
+        ("upload", "upload", "Upload"),
         ("prediction", "microscope", "Prediction"),
-        ("gradcam",    "flame",      "Explainability"),
-        ("metrics",    "chart",      "Metrics"),
-        ("analysis",   "sparkles",   "Full Analysis"),
-        ("about",      "info",       "About"),
+        ("gradcam", "flame", "Explainability"),
+        ("metrics", "chart", "Metrics"),
+        ("analysis", "sparkles", "Full Analysis"),
+        ("about", "info", "About"),
     ]
     nav_html = f"""
 <div class="hl-sidebar-brand">
@@ -642,6 +643,7 @@ def _sidebar_nav(active: str = "home") -> str:
 def inject_css(active: str = "home") -> None:
     """Call at the top of every Streamlit page."""
     import streamlit as st
+
     st.markdown(HEMALENS_CSS, unsafe_allow_html=True)
 
 
@@ -670,7 +672,9 @@ def section_title(text: str) -> str:
 
 
 def risk_badge(risk: str) -> str:
-    cls = {"LOW": "risk-low", "MEDIUM": "risk-medium", "HIGH": "risk-high"}.get(risk.upper(), "risk-medium")
+    cls = {"LOW": "risk-low", "MEDIUM": "risk-medium", "HIGH": "risk-high"}.get(
+        risk.upper(), "risk-medium"
+    )
     dot = {"LOW": "●", "MEDIUM": "●", "HIGH": "●"}.get(risk.upper(), "●")
     return f'<span class="risk-badge {cls}">{dot} {risk}</span>'
 
@@ -696,10 +700,12 @@ def confidence_bar(score: float, label: str = "Confidence") -> str:
 
 
 def stat_row(key: str, value: str) -> str:
-    return (f'<div class="stat-row">'
-            f'<span class="stat-key">{key}</span>'
-            f'<span class="stat-value">{value}</span>'
-            f'</div>')
+    return (
+        f'<div class="stat-row">'
+        f'<span class="stat-key">{key}</span>'
+        f'<span class="stat-value">{value}</span>'
+        f"</div>"
+    )
 
 
 def fancy_hr() -> str:

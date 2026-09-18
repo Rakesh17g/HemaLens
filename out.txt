@@ -1,0 +1,18 @@
+﻿C:\Users\raki_\OneDrive\Desktop\AIML\app\pages\7_Full_Analysis.py:425 BLE001 Do not catch blind exception: `Exception`
+C:\Users\raki_\OneDrive\Desktop\AIML\src\evaluation\engine.py:108 RUF012 Mutable default value for class attribute
+C:\Users\raki_\OneDrive\Desktop\AIML\src\evaluation\engine.py:471 BLE001 Do not catch blind exception: `Exception`
+C:\Users\raki_\OneDrive\Desktop\AIML\src\inference\confidence.py:106 RUF012 Mutable default value for class attribute
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:57 F401 `reportlab.graphics.renderPDF` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:58 F401 `reportlab.graphics.shapes.Circle` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:58 F401 `reportlab.graphics.shapes.Drawing` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:58 F401 `reportlab.graphics.shapes.Rect` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:58 F401 `reportlab.graphics.shapes.String` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:60 F401 `reportlab.lib.enums.TA_RIGHT` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:63 F401 `reportlab.lib.units.mm` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:64 F401 `reportlab.lib.utils.ImageReader` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:67 F401 `reportlab.platypus.BaseDocTemplate` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:68 F401 `reportlab.platypus.Frame` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:70 F401 `reportlab.platypus.KeepTogether` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\reports\report_generator.py:71 F401 `reportlab.platypus.PageTemplate` imported but unused; consider using `importlib.util.find_spec` to test for availability
+C:\Users\raki_\OneDrive\Desktop\AIML\src\training\evaluator.py:251 RUF012 Mutable default value for class attribute
+C:\Users\raki_\OneDrive\Desktop\AIML\tests\test_model_loading.py:185 RUF100 Unused `noqa` directive (non-enabled: `PT011`)

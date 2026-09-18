@@ -29,16 +29,15 @@ Custom Head design:
     - Binary output (1 neuron): used with BCEWithLogitsLoss / Focal Loss
 """
 
-from typing import Dict, List, Optional, Tuple
 
 import torch
-import torch.nn as nn
 import torchvision.models as tv_models
-
+from torch import nn
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Model Architecture
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class EfficientNetB0(nn.Module):
     """
@@ -59,28 +58,30 @@ class EfficientNetB0(nn.Module):
 
     def __init__(
         self,
-        pretrained:  bool = True,
-        dropout:     float = 0.40,
-        num_classes: int   = 1,
-        freeze_bn:   bool  = True,
+        pretrained: bool = True,
+        dropout: float = 0.40,
+        num_classes: int = 1,
+        freeze_bn: bool = True,
     ) -> None:
         super().__init__()
 
         # ── Load pretrained backbone ──────────────────────────────────
-        weights = tv_models.EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
+        weights = (
+            tv_models.EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
+        )
         backbone = tv_models.efficientnet_b0(weights=weights)
 
         # ── Strip original classifier, keep feature extractor only ───
         # backbone.features: Sequential of 9 blocks (features[0]–features[8])
         # backbone.avgpool:  AdaptiveAvgPool2d(1, 1)
-        self.features  = backbone.features
-        self.avgpool   = backbone.avgpool
+        self.features = backbone.features
+        self.avgpool = backbone.avgpool
 
         # ── Custom classification head ────────────────────────────────
         self.classifier = nn.Sequential(
             nn.Dropout(p=dropout, inplace=True),
             nn.Linear(self.BACKBONE_OUT_FEATURES, 512),
-            nn.SiLU(inplace=True),              # Swish — matches backbone activations
+            nn.SiLU(inplace=True),  # Swish — matches backbone activations
             nn.Dropout(p=0.30, inplace=False),
             nn.Linear(512, num_classes),
         )
@@ -124,7 +125,7 @@ class EfficientNetB0(nn.Module):
 
     # ── Phase Management (called by Trainer) ─────────────────────────────
 
-    def set_phase(self, phase: int) -> List[dict]:
+    def set_phase(self, phase: int) -> list[dict]:
         """
         Switch to a training phase and return param groups for optimizer.
 
@@ -152,17 +153,23 @@ class EfficientNetB0(nn.Module):
                 self._freeze_batchnorm()
             return [
                 {"params": self.classifier.parameters(), "lr": 1e-3, "name": "head"},
-                {"params": [p for i in unfreeze_blocks
-                            for p in self.features[i].parameters()
-                            if p.requires_grad],
-                 "lr": 1e-4, "name": "backbone_top"},
+                {
+                    "params": [
+                        p
+                        for i in unfreeze_blocks
+                        for p in self.features[i].parameters()
+                        if p.requires_grad
+                    ],
+                    "lr": 1e-4,
+                    "name": "backbone_top",
+                },
             ]
 
         elif phase == 3:
             self._unfreeze_backbone()
             return [
                 {"params": self.classifier.parameters(), "lr": 1e-4, "name": "head"},
-                {"params": self.features.parameters(),   "lr": 1e-5, "name": "backbone"},
+                {"params": self.features.parameters(), "lr": 1e-5, "name": "backbone"},
             ]
 
         else:
@@ -177,18 +184,18 @@ class EfficientNetB0(nn.Module):
         Returns:
             (B, 1) raw logits — apply sigmoid externally for probabilities.
         """
-        feat = self.features(x)          # (B, 1280, H', W')
-        feat = self.avgpool(feat)         # (B, 1280, 1,  1)
-        feat = torch.flatten(feat, 1)    # (B, 1280)
-        out  = self.classifier(feat)     # (B, 1)
+        feat = self.features(x)  # (B, 1280, H', W')
+        feat = self.avgpool(feat)  # (B, 1280, 1,  1)
+        feat = torch.flatten(feat, 1)  # (B, 1280)
+        out = self.classifier(feat)  # (B, 1)
         return out
 
     # ── Introspection ─────────────────────────────────────────────────────
 
-    def count_parameters(self) -> Dict[str, int]:
-        total     = sum(p.numel() for p in self.parameters())
+    def count_parameters(self) -> dict[str, int]:
+        total = sum(p.numel() for p in self.parameters())
         trainable = sum(p.numel() for p in self.parameters() if p.requires_grad)
-        frozen    = total - trainable
+        frozen = total - trainable
         return {"total": total, "trainable": trainable, "frozen": frozen}
 
     def train(self, mode: bool = True) -> "EfficientNetB0":
@@ -203,13 +210,14 @@ class EfficientNetB0(nn.Module):
 # Factory
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def build_model(
-    pretrained:  bool  = True,
-    dropout:     float = 0.40,
-    num_classes: int   = 1,
-    freeze_bn:   bool  = True,
-    checkpoint_path: Optional[str] = None,
-    device: Optional[torch.device] = None,
+    pretrained: bool = True,
+    dropout: float = 0.40,
+    num_classes: int = 1,
+    freeze_bn: bool = True,
+    checkpoint_path: str | None = None,
+    device: torch.device | None = None,
 ) -> EfficientNetB0:
     """
     Build and optionally restore the EfficientNet-B0 model.
@@ -227,10 +235,10 @@ def build_model(
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = EfficientNetB0(
-        pretrained  = pretrained,
-        dropout     = dropout,
-        num_classes = num_classes,
-        freeze_bn   = freeze_bn,
+        pretrained=pretrained,
+        dropout=dropout,
+        num_classes=num_classes,
+        freeze_bn=freeze_bn,
     )
 
     if checkpoint_path and os.path.isfile(checkpoint_path):
@@ -246,4 +254,4 @@ def build_model(
     return model
 
 
-import os  # noqa: E402 (imported at bottom to avoid circular at top)
+import os

@@ -75,12 +75,11 @@ RISK LEVELS
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Tuple
+from dataclasses import asdict, dataclass, field
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 logger = logging.getLogger("ALLConfidence")
 
@@ -88,6 +87,7 @@ logger = logging.getLogger("ALLConfidence")
 # ─────────────────────────────────────────────────────────────────────────────
 # Risk Level
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class RiskLevel:
     """
@@ -97,14 +97,15 @@ class RiskLevel:
     MEDIUM c ∈ [0.55, 0.80): Borderline case. Expert review recommended.
     HIGH   c < 0.55  : Model is uncertain. Do NOT act on prediction alone.
     """
-    LOW    = "LOW"
+
+    LOW = "LOW"
     MEDIUM = "MEDIUM"
-    HIGH   = "HIGH"
+    HIGH = "HIGH"
 
     # Default confidence boundaries (can be overridden at construction time)
-    THRESHOLDS = {
-        "LOW":    0.80,   # c ≥ 0.80 → LOW risk (trustworthy)
-        "MEDIUM": 0.55,   # 0.55 ≤ c < 0.80 → MEDIUM risk
+    THRESHOLDS = {  # noqa: RUF012
+        "LOW": 0.80,  # c ≥ 0.80 → LOW risk (trustworthy)
+        "MEDIUM": 0.55,  # 0.55 ≤ c < 0.80 → MEDIUM risk
         # c < 0.55 → HIGH risk (untrustworthy)
     }
 
@@ -112,7 +113,7 @@ class RiskLevel:
     def from_confidence(
         cls,
         confidence: float,
-        thresholds: Optional[Dict[str, float]] = None,
+        thresholds: dict[str, float] | None = None,
     ) -> str:
         """Return risk level string given a confidence score in [0, 1]."""
         t = thresholds or cls.THRESHOLDS
@@ -131,12 +132,30 @@ class RiskLevel:
     def clinical_note(cls, risk: str, prediction: str) -> str:
         """Return a plain-English clinical guidance string."""
         notes = {
-            (cls.LOW,    "ALL+"):    "High-confidence positive. Recommend immediate clinical review.",
-            (cls.LOW,    "Healthy"): "High-confidence negative. Standard monitoring protocol.",
-            (cls.MEDIUM, "ALL+"):    "Moderate-confidence positive. Pathologist review recommended.",
-            (cls.MEDIUM, "Healthy"): "Moderate-confidence negative. Consider follow-up smear.",
-            (cls.HIGH,   "ALL+"):    "UNCERTAIN positive. Do NOT act on model alone. Expert slide review required.",
-            (cls.HIGH,   "Healthy"): "UNCERTAIN negative. Image quality or cell morphology may be atypical. Human review required.",
+            (
+                cls.LOW,
+                "ALL+",
+            ): "High-confidence positive. Recommend immediate clinical review.",
+            (
+                cls.LOW,
+                "Healthy",
+            ): "High-confidence negative. Standard monitoring protocol.",
+            (
+                cls.MEDIUM,
+                "ALL+",
+            ): "Moderate-confidence positive. Pathologist review recommended.",
+            (
+                cls.MEDIUM,
+                "Healthy",
+            ): "Moderate-confidence negative. Consider follow-up smear.",
+            (
+                cls.HIGH,
+                "ALL+",
+            ): "UNCERTAIN positive. Do NOT act on model alone. Expert slide review required.",
+            (
+                cls.HIGH,
+                "Healthy",
+            ): "UNCERTAIN negative. Image quality or cell morphology may be atypical. Human review required.",
         }
         key = (risk, prediction)
         return notes.get(key, "Confidence is low. Manual review required.")
@@ -145,6 +164,7 @@ class RiskLevel:
 # ─────────────────────────────────────────────────────────────────────────────
 # Confidence Result (data container)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class ConfidenceResult:
@@ -175,47 +195,48 @@ class ConfidenceResult:
     # ── Weight breakdown ─────────────────────────────────────────────────
     weights         : dict   — {"boundary": w1, "entropy": w2, "mcdrop": w3}
     """
+
     # Core
-    probability:    float
-    prediction:     str
-    threshold:      float
+    probability: float
+    prediction: str
+    threshold: float
 
     # Confidence
-    confidence:     float
-    risk_level:     str
-    clinical_note:  str
+    confidence: float
+    risk_level: str
+    clinical_note: str
 
     # Breakdown
     boundary_score: float
-    entropy_score:  float
-    entropy_raw:    float
-    mcdrop_score:   float  = 0.0
-    mcdrop_std:     float  = 0.0
-    mcdrop_mean:    float  = 0.0
-    mcdrop_passes:  int    = 0
-    weights:        Dict[str, float] = field(
+    entropy_score: float
+    entropy_raw: float
+    mcdrop_score: float = 0.0
+    mcdrop_std: float = 0.0
+    mcdrop_mean: float = 0.0
+    mcdrop_passes: int = 0
+    weights: dict[str, float] = field(
         default_factory=lambda: {"boundary": 0.35, "entropy": 0.35, "mcdrop": 0.30}
     )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     def __str__(self) -> str:
         emoji = RiskLevel.emoji(self.risk_level)
         lines = [
-            f"",
-            f"  {'─'*52}",
-            f"  CONFIDENCE ESTIMATION REPORT",
-            f"  {'─'*52}",
-            f"",
-            f"  Prediction Probability  : {self.probability:.4f}  ({self.probability*100:.1f}%)",
+            "",
+            f"  {'─' * 52}",
+            "  CONFIDENCE ESTIMATION REPORT",
+            f"  {'─' * 52}",
+            "",
+            f"  Prediction Probability  : {self.probability:.4f}  ({self.probability * 100:.1f}%)",
             f"  Predicted Class         : {self.prediction}",
             f"  Decision Threshold      : {self.threshold:.3f}",
-            f"",
-            f"  Confidence Score        : {self.confidence:.4f}  ({self.confidence*100:.1f}%)",
+            "",
+            f"  Confidence Score        : {self.confidence:.4f}  ({self.confidence * 100:.1f}%)",
             f"  Risk Level              : {emoji} {self.risk_level}",
-            f"",
-            f"  ── Confidence Breakdown ──────────────────────────",
+            "",
+            "  ── Confidence Breakdown ──────────────────────────",
             f"  Boundary Distance Score : {self.boundary_score:.4f}  (w={self.weights['boundary']:.2f})",
             f"  Entropy Score           : {self.entropy_score:.4f}  (w={self.weights['entropy']:.2f})",
             f"  Raw Entropy H(p)        : {self.entropy_raw:.4f}  (max={np.log(2):.4f})",
@@ -227,20 +248,20 @@ class ConfidenceResult:
                 f"  MC Dropout mean prob    : {self.mcdrop_mean:.4f}",
             ]
         else:
-            lines.append(f"  MC Dropout              : disabled")
+            lines.append("  MC Dropout              : disabled")
         lines += [
-            f"",
-            f"  ── Why Probability ≠ Confidence ──────────────────",
-            f"  Probability is what the model OUTPUTS (sigmoid of logit).",
-            f"  Confidence is how much you should TRUST that output.",
-            f"  A model can output p=0.95 on a blurry/atypical image",
-            f"  it was never trained on — that is HIGH probability but",
-            f"  LOW confidence. Always check the confidence score in",
-            f"  medical diagnostic AI before acting on predictions.",
-            f"",
-            f"  ── Clinical Guidance ─────────────────────────────",
+            "",
+            "  ── Why Probability ≠ Confidence ──────────────────",
+            "  Probability is what the model OUTPUTS (sigmoid of logit).",
+            "  Confidence is how much you should TRUST that output.",
+            "  A model can output p=0.95 on a blurry/atypical image",
+            "  it was never trained on — that is HIGH probability but",
+            "  LOW confidence. Always check the confidence score in",
+            "  medical diagnostic AI before acting on predictions.",
+            "",
+            "  ── Clinical Guidance ─────────────────────────────",
             f"  {self.clinical_note}",
-            f"  {'─'*52}",
+            f"  {'─' * 52}",
         ]
         return "\n".join(lines)
 
@@ -248,6 +269,7 @@ class ConfidenceResult:
 # ─────────────────────────────────────────────────────────────────────────────
 # Component Estimators
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _boundary_score(prob: float, threshold: float) -> float:
     """
@@ -265,12 +287,12 @@ def _boundary_score(prob: float, threshold: float) -> float:
       p=0.53 → score = |0.53−0.50| / 0.50 = 0.06
       p=0.50 → score = 0.0  (maximally uncertain)
     """
-    distance  = abs(prob - threshold)
-    max_dist  = max(threshold, 1.0 - threshold)  # ≥ 0.5
+    distance = abs(prob - threshold)
+    max_dist = max(threshold, 1.0 - threshold)  # ≥ 0.5
     return float(np.clip(distance / max_dist, 0.0, 1.0))
 
 
-def _entropy_score(prob: float) -> Tuple[float, float]:
+def _entropy_score(prob: float) -> tuple[float, float]:
     """
     Confidence score from predictive entropy.
 
@@ -286,19 +308,19 @@ def _entropy_score(prob: float) -> Tuple[float, float]:
     (confidence_score, raw_entropy)
     """
     eps = 1e-7
-    p   = float(np.clip(prob, eps, 1 - eps))
-    h   = -(p * np.log(p) + (1 - p) * np.log(1 - p))
+    p = float(np.clip(prob, eps, 1 - eps))
+    h = -(p * np.log(p) + (1 - p) * np.log(1 - p))
     h_norm = h / np.log(2)
     return float(1.0 - h_norm), float(h)
 
 
 def _mcdropout_score(
-    model:   nn.Module,
-    image:   torch.Tensor,   # (1, C, H, W) — single image
-    device:  torch.device,
-    passes:  int   = 20,
-    use_amp: bool  = False,
-) -> Tuple[float, float, float]:
+    model: nn.Module,
+    image: torch.Tensor,  # (1, C, H, W) — single image
+    device: torch.device,
+    passes: int = 20,
+    use_amp: bool = False,
+) -> tuple[float, float, float]:
     """
     Monte Carlo Dropout uncertainty estimate for a single image.
 
@@ -318,22 +340,20 @@ def _mcdropout_score(
       mean_prob         : Mean of T predictions.
     """
     model.train()  # activate dropout
-    probs: List[float] = []
+    probs: list[float] = []
 
     with torch.no_grad():
         image = image.to(device)
         for _ in range(passes):
-            with torch.cuda.amp.autocast(
-                enabled=(use_amp and device.type == "cuda")
-            ):
-                logit = model(image)            # (1, 1)
-                prob  = torch.sigmoid(logit).item()
+            with torch.cuda.amp.autocast(enabled=(use_amp and device.type == "cuda")):
+                logit = model(image)  # (1, 1)
+                prob = torch.sigmoid(logit).item()
             probs.append(prob)
 
     model.eval()  # restore eval mode
 
-    arr  = np.array(probs, dtype=np.float32)
-    std  = float(arr.std())
+    arr = np.array(probs, dtype=np.float32)
+    std = float(arr.std())
     mean = float(arr.mean())
 
     # Confidence: maximum std of a Bernoulli = 0.5 → normalise by 0.5
@@ -345,6 +365,7 @@ def _mcdropout_score(
 # ─────────────────────────────────────────────────────────────────────────────
 # ConfidenceEstimator  (main class)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class ConfidenceEstimator:
     """
@@ -375,11 +396,11 @@ class ConfidenceEstimator:
 
     def __init__(
         self,
-        threshold:          float                    = 0.50,
-        mc_dropout_passes:  int                      = 20,
-        weights:            Tuple[float, float, float] = (0.35, 0.35, 0.30),
-        risk_thresholds:    Optional[Dict[str, float]] = None,
-        use_amp:            bool                     = False,
+        threshold: float = 0.50,
+        mc_dropout_passes: int = 20,
+        weights: tuple[float, float, float] = (0.35, 0.35, 0.30),
+        risk_thresholds: dict[str, float] | None = None,
+        use_amp: bool = False,
     ) -> None:
         if len(weights) != 3:
             raise ValueError("weights must be a 3-tuple: (boundary, entropy, mcdrop)")
@@ -387,18 +408,18 @@ class ConfidenceEstimator:
         if abs(w_sum - 1.0) > 1e-4:
             raise ValueError(f"weights must sum to 1.0 (got {w_sum:.4f})")
 
-        self.threshold         = threshold
+        self.threshold = threshold
         self.mc_dropout_passes = mc_dropout_passes
-        self.risk_thresholds   = risk_thresholds or RiskLevel.THRESHOLDS
-        self.use_amp           = use_amp
+        self.risk_thresholds = risk_thresholds or RiskLevel.THRESHOLDS
+        self.use_amp = use_amp
 
         # Adjust weights if MC Dropout is disabled
         if mc_dropout_passes == 0:
             w_b, w_e, _ = weights
             total = w_b + w_e
             self._w_boundary = w_b / total
-            self._w_entropy  = w_e / total
-            self._w_mcdrop   = 0.0
+            self._w_entropy = w_e / total
+            self._w_mcdrop = 0.0
         else:
             self._w_boundary, self._w_entropy, self._w_mcdrop = weights
 
@@ -413,9 +434,9 @@ class ConfidenceEstimator:
 
     def estimate(
         self,
-        model:  nn.Module,
-        image:  torch.Tensor,   # (1, C, H, W) or (C, H, W) single image
-        device: Optional[torch.device] = None,
+        model: nn.Module,
+        image: torch.Tensor,  # (1, C, H, W) or (C, H, W) single image
+        device: torch.device | None = None,
     ) -> ConfidenceResult:
         """
         Estimate confidence for a single image tensor.
@@ -432,16 +453,15 @@ class ConfidenceEstimator:
         ConfidenceResult dataclass with all fields populated.
         """
         device = device or next(model.parameters()).device
-        image  = image.unsqueeze(0) if image.ndim == 3 else image  # → (1,C,H,W)
+        image = image.unsqueeze(0) if image.ndim == 3 else image  # → (1,C,H,W)
 
         # ── Step 1: deterministic probability ────────────────────────────────
         model.eval()
-        with torch.no_grad():
-            with torch.cuda.amp.autocast(
-                enabled=(self.use_amp and device.type == "cuda")
-            ):
-                logit = model(image.to(device))
-                prob  = float(torch.sigmoid(logit).item())
+        with torch.no_grad(), torch.cuda.amp.autocast(
+            enabled=(self.use_amp and device.type == "cuda")
+        ):
+            logit = model(image.to(device))
+            prob = float(torch.sigmoid(logit).item())
 
         # ── Step 2: boundary distance score ──────────────────────────────────
         b_score = _boundary_score(prob, self.threshold)
@@ -453,43 +473,45 @@ class ConfidenceEstimator:
         mc_conf, mc_std, mc_mean = 0.0, 0.0, prob
         if self.mc_dropout_passes > 0:
             mc_conf, mc_std, mc_mean = _mcdropout_score(
-                model, image, device,
-                passes  = self.mc_dropout_passes,
-                use_amp = self.use_amp,
+                model,
+                image,
+                device,
+                passes=self.mc_dropout_passes,
+                use_amp=self.use_amp,
             )
         model.eval()  # ensure we leave model in eval
 
         # ── Step 5: combined confidence ───────────────────────────────────────
         confidence = (
             self._w_boundary * b_score
-            + self._w_entropy  * e_score
-            + self._w_mcdrop   * mc_conf
+            + self._w_entropy * e_score
+            + self._w_mcdrop * mc_conf
         )
         confidence = float(np.clip(confidence, 0.0, 1.0))
 
         # ── Step 6: risk + prediction ─────────────────────────────────────────
         predicted_cls = "ALL+" if prob >= self.threshold else "Healthy"
-        risk          = RiskLevel.from_confidence(confidence, self.risk_thresholds)
-        note          = RiskLevel.clinical_note(risk, predicted_cls)
+        risk = RiskLevel.from_confidence(confidence, self.risk_thresholds)
+        note = RiskLevel.clinical_note(risk, predicted_cls)
 
         return ConfidenceResult(
-            probability    = prob,
-            prediction     = predicted_cls,
-            threshold      = self.threshold,
-            confidence     = confidence,
-            risk_level     = risk,
-            clinical_note  = note,
-            boundary_score = b_score,
-            entropy_score  = e_score,
-            entropy_raw    = h_raw,
-            mcdrop_score   = mc_conf,
-            mcdrop_std     = mc_std,
-            mcdrop_mean    = mc_mean,
-            mcdrop_passes  = self.mc_dropout_passes,
-            weights        = {
+            probability=prob,
+            prediction=predicted_cls,
+            threshold=self.threshold,
+            confidence=confidence,
+            risk_level=risk,
+            clinical_note=note,
+            boundary_score=b_score,
+            entropy_score=e_score,
+            entropy_raw=h_raw,
+            mcdrop_score=mc_conf,
+            mcdrop_std=mc_std,
+            mcdrop_mean=mc_mean,
+            mcdrop_passes=self.mc_dropout_passes,
+            weights={
                 "boundary": round(self._w_boundary, 4),
-                "entropy":  round(self._w_entropy,  4),
-                "mcdrop":   round(self._w_mcdrop,   4),
+                "entropy": round(self._w_entropy, 4),
+                "mcdrop": round(self._w_mcdrop, 4),
             },
         )
 
@@ -497,8 +519,8 @@ class ConfidenceEstimator:
 
     def estimate_batch(
         self,
-        probs: np.ndarray,   # (N,) float array of sigmoid probabilities
-    ) -> List[ConfidenceResult]:
+        probs: np.ndarray,  # (N,) float array of sigmoid probabilities
+    ) -> list[ConfidenceResult]:
         """
         Compute confidence for a batch of pre-collected probabilities.
 
@@ -516,48 +538,51 @@ class ConfidenceEstimator:
         List of ConfidenceResult (one per sample).
         """
         # Redistribute mcdrop weight to boundary + entropy
-        total_w  = self._w_boundary + self._w_entropy
-        w_b      = self._w_boundary / total_w
-        w_e      = self._w_entropy  / total_w
-        w_mc     = 0.0
+        total_w = self._w_boundary + self._w_entropy
+        w_b = self._w_boundary / total_w
+        w_e = self._w_entropy / total_w
 
         results = []
         for prob in probs:
-            prob   = float(prob)
-            b_sc   = _boundary_score(prob, self.threshold)
+            prob = float(prob)
+            b_sc = _boundary_score(prob, self.threshold)
             e_sc, h_raw = _entropy_score(prob)
-            conf   = float(np.clip(w_b * b_sc + w_e * e_sc, 0.0, 1.0))
+            conf = float(np.clip(w_b * b_sc + w_e * e_sc, 0.0, 1.0))
 
             predicted_cls = "ALL+" if prob >= self.threshold else "Healthy"
-            risk  = RiskLevel.from_confidence(conf, self.risk_thresholds)
-            note  = RiskLevel.clinical_note(risk, predicted_cls)
+            risk = RiskLevel.from_confidence(conf, self.risk_thresholds)
+            note = RiskLevel.clinical_note(risk, predicted_cls)
 
-            results.append(ConfidenceResult(
-                probability    = prob,
-                prediction     = predicted_cls,
-                threshold      = self.threshold,
-                confidence     = conf,
-                risk_level     = risk,
-                clinical_note  = note,
-                boundary_score = b_sc,
-                entropy_score  = e_sc,
-                entropy_raw    = h_raw,
-                mcdrop_score   = 0.0,
-                mcdrop_std     = 0.0,
-                mcdrop_mean    = prob,
-                mcdrop_passes  = 0,
-                weights        = {"boundary": round(w_b, 4),
-                                  "entropy": round(w_e, 4),
-                                  "mcdrop": 0.0},
-            ))
+            results.append(
+                ConfidenceResult(
+                    probability=prob,
+                    prediction=predicted_cls,
+                    threshold=self.threshold,
+                    confidence=conf,
+                    risk_level=risk,
+                    clinical_note=note,
+                    boundary_score=b_sc,
+                    entropy_score=e_sc,
+                    entropy_raw=h_raw,
+                    mcdrop_score=0.0,
+                    mcdrop_std=0.0,
+                    mcdrop_mean=prob,
+                    mcdrop_passes=0,
+                    weights={
+                        "boundary": round(w_b, 4),
+                        "entropy": round(w_e, 4),
+                        "mcdrop": 0.0,
+                    },
+                )
+            )
         return results
 
     # ── Summary statistics over a batch ──────────────────────────────────────
 
     @staticmethod
     def batch_summary(
-        results: List[ConfidenceResult],
-    ) -> Dict[str, object]:
+        results: list[ConfidenceResult],
+    ) -> dict[str, object]:
         """
         Aggregate statistics over a list of ConfidenceResults.
 
@@ -566,30 +591,34 @@ class ConfidenceEstimator:
         Dict with keys: mean_confidence, std_confidence, risk_counts,
         risk_fractions, mean_probability, n_samples, n_low, n_medium, n_high.
         """
-        confidences = np.array([r.confidence  for r in results])
-        probs       = np.array([r.probability  for r in results])
-        risks       = [r.risk_level for r in results]
+        confidences = np.array([r.confidence for r in results])
+        probs = np.array([r.probability for r in results])
+        risks = [r.risk_level for r in results]
 
-        n_low    = risks.count(RiskLevel.LOW)
+        n_low = risks.count(RiskLevel.LOW)
         n_medium = risks.count(RiskLevel.MEDIUM)
-        n_high   = risks.count(RiskLevel.HIGH)
-        n        = len(results)
+        n_high = risks.count(RiskLevel.HIGH)
+        n = len(results)
 
         return {
-            "n_samples":        n,
-            "mean_confidence":  float(confidences.mean()),
-            "std_confidence":   float(confidences.std()),
-            "min_confidence":   float(confidences.min()),
-            "max_confidence":   float(confidences.max()),
+            "n_samples": n,
+            "mean_confidence": float(confidences.mean()),
+            "std_confidence": float(confidences.std()),
+            "min_confidence": float(confidences.min()),
+            "max_confidence": float(confidences.max()),
             "mean_probability": float(probs.mean()),
-            "n_low":    n_low,
+            "n_low": n_low,
             "n_medium": n_medium,
-            "n_high":   n_high,
-            "risk_counts":     {RiskLevel.LOW: n_low, RiskLevel.MEDIUM: n_medium, RiskLevel.HIGH: n_high},
-            "risk_fractions":   {
-                RiskLevel.LOW:    round(n_low    / n, 4),
+            "n_high": n_high,
+            "risk_counts": {
+                RiskLevel.LOW: n_low,
+                RiskLevel.MEDIUM: n_medium,
+                RiskLevel.HIGH: n_high,
+            },
+            "risk_fractions": {
+                RiskLevel.LOW: round(n_low / n, 4),
                 RiskLevel.MEDIUM: round(n_medium / n, 4),
-                RiskLevel.HIGH:   round(n_high   / n, 4),
+                RiskLevel.HIGH: round(n_high / n, 4),
             },
         }
 

@@ -51,9 +51,9 @@ __all__ = [
     # Confidence
     "ConfidenceEstimator",
     "ConfidenceResult",
-    "RiskLevel",
     # Pipeline
     "InferencePipeline",
     "PipelineResult",
+    "RiskLevel",
     "preprocess",
 ]

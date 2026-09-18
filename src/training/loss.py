@@ -30,15 +30,15 @@ WHY LABEL SMOOTHING:
   Label smoothing replaces hard labels {0,1} with soft {ε/2, 1-ε/2}.
 """
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from typing import Optional
 
+import torch
+import torch.nn.functional as F
+from torch import nn
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Focal Loss
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class FocalLoss(nn.Module):
     """
@@ -54,38 +54,38 @@ class FocalLoss(nn.Module):
 
     def __init__(
         self,
-        alpha:           float = 0.25,
-        gamma:           float = 2.0,
-        reduction:       str   = "mean",
+        alpha: float = 0.25,
+        gamma: float = 2.0,
+        reduction: str = "mean",
         label_smoothing: float = 0.0,
     ) -> None:
         super().__init__()
-        self.alpha           = alpha
-        self.gamma           = gamma
-        self.reduction       = reduction
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
         self.label_smoothing = label_smoothing
 
     def forward(
         self,
-        logits: torch.Tensor,   # (B, 1) raw model outputs (before sigmoid)
+        logits: torch.Tensor,  # (B, 1) raw model outputs (before sigmoid)
         targets: torch.Tensor,  # (B,) or (B, 1) float labels {0.0, 1.0}
     ) -> torch.Tensor:
         targets = targets.view(-1, 1).float()
-        logits  = logits.view(-1, 1).float()
+        logits = logits.view(-1, 1).float()
 
         # Label smoothing
         if self.label_smoothing > 0:
-            targets = targets * (1 - self.label_smoothing) + \
-                      (1 - targets) * self.label_smoothing
+            targets = (
+                targets * (1 - self.label_smoothing)
+                + (1 - targets) * self.label_smoothing
+            )
 
         # Binary cross-entropy per element (numerically stable via log-sum-exp)
-        bce = F.binary_cross_entropy_with_logits(
-            logits, targets, reduction="none"
-        )
+        bce = F.binary_cross_entropy_with_logits(logits, targets, reduction="none")
 
         # Probability of the TRUE class
-        prob    = torch.sigmoid(logits)
-        p_t     = prob * targets + (1 - prob) * (1 - targets)
+        prob = torch.sigmoid(logits)
+        p_t = prob * targets + (1 - prob) * (1 - targets)
 
         # Focal weight: (1 - p_t)^gamma
         focal_w = (1.0 - p_t) ** self.gamma
@@ -106,6 +106,7 @@ class FocalLoss(nn.Module):
 # ─────────────────────────────────────────────────────────────────────────────
 # Weighted BCE Loss  (simpler alternative)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class WeightedBCELoss(nn.Module):
     """
@@ -130,19 +131,20 @@ class WeightedBCELoss(nn.Module):
 # Factory
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def build_loss(
-    name:            str   = "focal",
-    focal_alpha:     float = 0.25,
-    focal_gamma:     float = 2.0,
-    pos_weight:      float = 1.64,
+    name: str = "focal",
+    focal_alpha: float = 0.25,
+    focal_gamma: float = 2.0,
+    pos_weight: float = 1.64,
     label_smoothing: float = 0.1,
 ) -> nn.Module:
     """Return the configured loss function."""
     if name == "focal":
         return FocalLoss(
-            alpha           = focal_alpha,
-            gamma           = focal_gamma,
-            label_smoothing = label_smoothing,
+            alpha=focal_alpha,
+            gamma=focal_gamma,
+            label_smoothing=label_smoothing,
         )
     elif name == "bce":
         return nn.BCEWithLogitsLoss()

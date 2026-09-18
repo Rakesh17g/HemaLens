@@ -1,0 +1,1682 @@
+﻿BLE001 Do not catch blind exception: `Exception`
+   --> app\components\model_utils.py:239:12
+    |
+237 |         return gen.generate_bytes(data)
+238 |
+239 |     except Exception as exc:
+    |            ^^^^^^^^^
+240 |         import traceback
+    |
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:143:26
+    |
+141 |                     mode="lines",
+142 |                     name=f"{ch} channel",
+143 |                     line=dict(color=col, width=1.5),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+144 |                     fill="tozeroy",
+145 |                     fillcolor=col.replace("#", "rgba(")
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:154:18
+    |
+152 |             paper_bgcolor="#0e0e0e",
+153 |             plot_bgcolor="#050505",
+154 |             font=dict(color="#888888", family="Inter"),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+155 |             margin=dict(l=10, r=10, t=10, b=10),
+156 |             legend=dict(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:155:20
+    |
+153 |             plot_bgcolor="#050505",
+154 |             font=dict(color="#888888", family="Inter"),
+155 |             margin=dict(l=10, r=10, t=10, b=10),
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+156 |             legend=dict(
+157 |                 bgcolor="#0e0e0e",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:156:20
+    |
+154 |               font=dict(color="#888888", family="Inter"),
+155 |               margin=dict(l=10, r=10, t=10, b=10),
+156 |               legend=dict(
+    |  ____________________^
+157 | |                 bgcolor="#0e0e0e",
+158 | |                 bordercolor="rgba(255,255,255,0.07)",
+159 | |                 borderwidth=1,
+160 | |                 font=dict(size=10),
+161 | |             ),
+    | |_____________^
+162 |               xaxis=dict(
+163 |                   gridcolor="rgba(255,255,255,0.04)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:160:22
+    |
+158 |                 bordercolor="rgba(255,255,255,0.07)",
+159 |                 borderwidth=1,
+160 |                 font=dict(size=10),
+    |                      ^^^^^^^^^^^^^
+161 |             ),
+162 |             xaxis=dict(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:162:19
+    |
+160 |                   font=dict(size=10),
+161 |               ),
+162 |               xaxis=dict(
+    |  ___________________^
+163 | |                 gridcolor="rgba(255,255,255,0.04)",
+164 | |                 title="Pixel value",
+165 | |                 title_font_size=10,
+166 | |             ),
+    | |_____________^
+167 |               yaxis=dict(
+168 |                   gridcolor="rgba(255,255,255,0.04)", title="Count", title_font_size=10
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\2_Upload.py:167:19
+    |
+165 |                   title_font_size=10,
+166 |               ),
+167 |               yaxis=dict(
+    |  ___________________^
+168 | |                 gridcolor="rgba(255,255,255,0.04)", title="Count", title_font_size=10
+169 | |             ),
+    | |_____________^
+170 |               height=180,
+171 |           )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:203:18
+    |
+201 |             theta=components + [components[0]],
+202 |             fill="toself",
+203 |             line=dict(color="#a5f9ef", width=1.5),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+204 |             fillcolor="rgba(165,249,239,0.08)",
+205 |             name="Confidence",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:209:15
+    |
+207 |       )
+208 |       radar.update_layout(
+209 |           polar=dict(
+    |  _______________^
+210 | |             bgcolor="#0e0e0e",
+211 | |             radialaxis=dict(
+212 | |                 range=[0, 1],
+213 | |                 tickfont=dict(size=8, color="#555"),
+214 | |                 gridcolor="rgba(255,255,255,0.06)",
+215 | |                 linecolor="rgba(255,255,255,0.06)",
+216 | |             ),
+217 | |             angularaxis=dict(
+218 | |                 tickfont=dict(size=10, color="#888"),
+219 | |                 gridcolor="rgba(255,255,255,0.06)",
+220 | |                 linecolor="rgba(255,255,255,0.06)",
+221 | |             ),
+222 | |         ),
+    | |_________^
+223 |           paper_bgcolor="#050505",
+224 |           font=dict(color="#888", family="Inter"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:211:24
+    |
+209 |           polar=dict(
+210 |               bgcolor="#0e0e0e",
+211 |               radialaxis=dict(
+    |  ________________________^
+212 | |                 range=[0, 1],
+213 | |                 tickfont=dict(size=8, color="#555"),
+214 | |                 gridcolor="rgba(255,255,255,0.06)",
+215 | |                 linecolor="rgba(255,255,255,0.06)",
+216 | |             ),
+    | |_____________^
+217 |               angularaxis=dict(
+218 |                   tickfont=dict(size=10, color="#888"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:213:26
+    |
+211 |             radialaxis=dict(
+212 |                 range=[0, 1],
+213 |                 tickfont=dict(size=8, color="#555"),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+214 |                 gridcolor="rgba(255,255,255,0.06)",
+215 |                 linecolor="rgba(255,255,255,0.06)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:217:25
+    |
+215 |                   linecolor="rgba(255,255,255,0.06)",
+216 |               ),
+217 |               angularaxis=dict(
+    |  _________________________^
+218 | |                 tickfont=dict(size=10, color="#888"),
+219 | |                 gridcolor="rgba(255,255,255,0.06)",
+220 | |                 linecolor="rgba(255,255,255,0.06)",
+221 | |             ),
+    | |_____________^
+222 |           ),
+223 |           paper_bgcolor="#050505",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:218:26
+    |
+216 |             ),
+217 |             angularaxis=dict(
+218 |                 tickfont=dict(size=10, color="#888"),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+219 |                 gridcolor="rgba(255,255,255,0.06)",
+220 |                 linecolor="rgba(255,255,255,0.06)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:224:14
+    |
+222 |         ),
+223 |         paper_bgcolor="#050505",
+224 |         font=dict(color="#888", family="Inter"),
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+225 |         margin=dict(l=30, r=30, t=30, b=30),
+226 |         showlegend=False,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:225:16
+    |
+223 |         paper_bgcolor="#050505",
+224 |         font=dict(color="#888", family="Inter"),
+225 |         margin=dict(l=30, r=30, t=30, b=30),
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+226 |         showlegend=False,
+227 |         height=240,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:250:20
+    |
+248 |             mode="gauge+number",
+249 |             value=prob * 100,
+250 |             number=dict(suffix="%", font=dict(size=26, color=pred_color)),
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+251 |             gauge=dict(
+252 |                 axis=dict(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:250:42
+    |
+248 |             mode="gauge+number",
+249 |             value=prob * 100,
+250 |             number=dict(suffix="%", font=dict(size=26, color=pred_color)),
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+251 |             gauge=dict(
+252 |                 axis=dict(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:251:19
+    |
+249 |               value=prob * 100,
+250 |               number=dict(suffix="%", font=dict(size=26, color=pred_color)),
+251 |               gauge=dict(
+    |  ___________________^
+252 | |                 axis=dict(
+253 | |                     range=[0, 100], tickcolor="#555", tickfont=dict(color="#555")
+254 | |                 ),
+255 | |                 bar=dict(color=pred_color),
+256 | |                 bgcolor="#141414",
+257 | |                 borderwidth=0,
+258 | |                 steps=[
+259 | |                     dict(range=[0, thresh * 100], color="rgba(143,205,183,0.05)"),
+260 | |                     dict(range=[thresh * 100, 100], color="rgba(220,68,60,0.05)"),
+261 | |                 ],
+262 | |                 threshold=dict(
+263 | |                     line=dict(color="#c4956a", width=2),
+264 | |                     thickness=0.8,
+265 | |                     value=thresh * 100,
+266 | |                 ),
+267 | |             ),
+    | |_____________^
+268 |           )
+269 |       )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:252:22
+    |
+250 |               number=dict(suffix="%", font=dict(size=26, color=pred_color)),
+251 |               gauge=dict(
+252 |                   axis=dict(
+    |  ______________________^
+253 | |                     range=[0, 100], tickcolor="#555", tickfont=dict(color="#555")
+254 | |                 ),
+    | |_________________^
+255 |                   bar=dict(color=pred_color),
+256 |                   bgcolor="#141414",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:253:64
+    |
+251 |             gauge=dict(
+252 |                 axis=dict(
+253 |                     range=[0, 100], tickcolor="#555", tickfont=dict(color="#555")
+    |                                                                ^^^^^^^^^^^^^^^^^^
+254 |                 ),
+255 |                 bar=dict(color=pred_color),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:255:21
+    |
+253 |                     range=[0, 100], tickcolor="#555", tickfont=dict(color="#555")
+254 |                 ),
+255 |                 bar=dict(color=pred_color),
+    |                     ^^^^^^^^^^^^^^^^^^^^^^
+256 |                 bgcolor="#141414",
+257 |                 borderwidth=0,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:259:21
+    |
+257 |                 borderwidth=0,
+258 |                 steps=[
+259 |                     dict(range=[0, thresh * 100], color="rgba(143,205,183,0.05)"),
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+260 |                     dict(range=[thresh * 100, 100], color="rgba(220,68,60,0.05)"),
+261 |                 ],
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:260:21
+    |
+258 |                 steps=[
+259 |                     dict(range=[0, thresh * 100], color="rgba(143,205,183,0.05)"),
+260 |                     dict(range=[thresh * 100, 100], color="rgba(220,68,60,0.05)"),
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+261 |                 ],
+262 |                 threshold=dict(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:262:27
+    |
+260 |                       dict(range=[thresh * 100, 100], color="rgba(220,68,60,0.05)"),
+261 |                   ],
+262 |                   threshold=dict(
+    |  ___________________________^
+263 | |                     line=dict(color="#c4956a", width=2),
+264 | |                     thickness=0.8,
+265 | |                     value=thresh * 100,
+266 | |                 ),
+    | |_________________^
+267 |               ),
+268 |           )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:263:26
+    |
+261 |                 ],
+262 |                 threshold=dict(
+263 |                     line=dict(color="#c4956a", width=2),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+264 |                     thickness=0.8,
+265 |                     value=thresh * 100,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:272:14
+    |
+270 |     gauge.update_layout(
+271 |         paper_bgcolor="#0e0e0e",
+272 |         font=dict(color="#888", family="Inter"),
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+273 |         margin=dict(l=20, r=20, t=20, b=10),
+274 |         height=210,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\3_Prediction.py:273:16
+    |
+271 |         paper_bgcolor="#0e0e0e",
+272 |         font=dict(color="#888", family="Inter"),
+273 |         margin=dict(l=20, r=20, t=20, b=10),
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274 |         height=210,
+275 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:140:18
+    |
+138 |             paper_bgcolor="#050505",
+139 |             plot_bgcolor="#050505",
+140 |             font=dict(color="#888", family="Inter"),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+141 |             coloraxis_showscale=False,
+142 |             margin=dict(l=5, r=5, t=35, b=5),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:142:20
+    |
+140 |             font=dict(color="#888", family="Inter"),
+141 |             coloraxis_showscale=False,
+142 |             margin=dict(l=5, r=5, t=35, b=5),
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+143 |             title_font=dict(size=12, color="#888"),
+144 |         )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:143:24
+    |
+141 |             coloraxis_showscale=False,
+142 |             margin=dict(l=5, r=5, t=35, b=5),
+143 |             title_font=dict(size=12, color="#888"),
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+144 |         )
+145 |         fig.update_xaxes(showticklabels=False)
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:189:18
+    |
+187 |             y=row_mean,
+188 |             name="Row mean",
+189 |             line=dict(color="#a5f9ef", width=1.5),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+190 |             fill="tozeroy",
+191 |             fillcolor="rgba(165,249,239,0.08)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:199:18
+    |
+197 |             y=col_mean,
+198 |             name="Column mean",
+199 |             line=dict(color="#8fcdb7", width=1.5),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+200 |             fill="tozeroy",
+201 |             fillcolor="rgba(143,205,183,0.08)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:207:14
+    |
+205 |         paper_bgcolor="#0e0e0e",
+206 |         plot_bgcolor="#050505",
+207 |         font=dict(color="#888", family="Inter"),
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+208 |         legend=dict(bgcolor="#0e0e0e", bordercolor="rgba(255,255,255,0.07)"),
+209 |         xaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Pixel position"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:208:16
+    |
+206 |         plot_bgcolor="#050505",
+207 |         font=dict(color="#888", family="Inter"),
+208 |         legend=dict(bgcolor="#0e0e0e", bordercolor="rgba(255,255,255,0.07)"),
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+209 |         xaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Pixel position"),
+210 |         yaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Mean Activation"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:209:15
+    |
+207 |         font=dict(color="#888", family="Inter"),
+208 |         legend=dict(bgcolor="#0e0e0e", bordercolor="rgba(255,255,255,0.07)"),
+209 |         xaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Pixel position"),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+210 |         yaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Mean Activation"),
+211 |         margin=dict(l=10, r=10, t=10, b=10),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:210:15
+    |
+208 |         legend=dict(bgcolor="#0e0e0e", bordercolor="rgba(255,255,255,0.07)"),
+209 |         xaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Pixel position"),
+210 |         yaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Mean Activation"),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+211 |         margin=dict(l=10, r=10, t=10, b=10),
+212 |         height=260,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:211:16
+    |
+209 |         xaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Pixel position"),
+210 |         yaxis=dict(gridcolor="rgba(255,255,255,0.04)", title="Mean Activation"),
+211 |         margin=dict(l=10, r=10, t=10, b=10),
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+212 |         height=260,
+213 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:225:22
+    |
+223 |               colorscale="magma",
+224 |               showscale=True,
+225 |               contours=dict(
+    |  ______________________^
+226 | |                 z=dict(
+227 | |                     show=True,
+228 | |                     usecolormap=True,
+229 | |                     highlightcolor="white",
+230 | |                     project=dict(z=True),
+231 | |                 )
+232 | |             ),
+    | |_____________^
+233 |           )
+234 |       )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:226:19
+    |
+224 |               showscale=True,
+225 |               contours=dict(
+226 |                   z=dict(
+    |  ___________________^
+227 | |                     show=True,
+228 | |                     usecolormap=True,
+229 | |                     highlightcolor="white",
+230 | |                     project=dict(z=True),
+231 | |                 )
+    | |_________________^
+232 |               ),
+233 |           )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:230:29
+    |
+228 |                     usecolormap=True,
+229 |                     highlightcolor="white",
+230 |                     project=dict(z=True),
+    |                             ^^^^^^^^^^^^
+231 |                 )
+232 |             ),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:237:15
+    |
+235 |       fig3.update_layout(
+236 |           paper_bgcolor="#050505",
+237 |           scene=dict(
+    |  _______________^
+238 | |             bgcolor="#050505",
+239 | |             xaxis=dict(
+240 | |                 backgroundcolor="#0e0e0e",
+241 | |                 gridcolor="rgba(255,255,255,0.05)",
+242 | |                 showbackground=True,
+243 | |                 title="X",
+244 | |             ),
+245 | |             yaxis=dict(
+246 | |                 backgroundcolor="#0e0e0e",
+247 | |                 gridcolor="rgba(255,255,255,0.05)",
+248 | |                 showbackground=True,
+249 | |                 title="Y",
+250 | |             ),
+251 | |             zaxis=dict(
+252 | |                 backgroundcolor="#0e0e0e",
+253 | |                 gridcolor="rgba(255,255,255,0.05)",
+254 | |                 showbackground=True,
+255 | |                 title="Activation",
+256 | |             ),
+257 | |         ),
+    | |_________^
+258 |           font=dict(color="#888"),
+259 |           margin=dict(l=0, r=0, t=0, b=0),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:239:19
+    |
+237 |           scene=dict(
+238 |               bgcolor="#050505",
+239 |               xaxis=dict(
+    |  ___________________^
+240 | |                 backgroundcolor="#0e0e0e",
+241 | |                 gridcolor="rgba(255,255,255,0.05)",
+242 | |                 showbackground=True,
+243 | |                 title="X",
+244 | |             ),
+    | |_____________^
+245 |               yaxis=dict(
+246 |                   backgroundcolor="#0e0e0e",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:245:19
+    |
+243 |                   title="X",
+244 |               ),
+245 |               yaxis=dict(
+    |  ___________________^
+246 | |                 backgroundcolor="#0e0e0e",
+247 | |                 gridcolor="rgba(255,255,255,0.05)",
+248 | |                 showbackground=True,
+249 | |                 title="Y",
+250 | |             ),
+    | |_____________^
+251 |               zaxis=dict(
+252 |                   backgroundcolor="#0e0e0e",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:251:19
+    |
+249 |                   title="Y",
+250 |               ),
+251 |               zaxis=dict(
+    |  ___________________^
+252 | |                 backgroundcolor="#0e0e0e",
+253 | |                 gridcolor="rgba(255,255,255,0.05)",
+254 | |                 showbackground=True,
+255 | |                 title="Activation",
+256 | |             ),
+    | |_____________^
+257 |           ),
+258 |           font=dict(color="#888"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:258:14
+    |
+256 |             ),
+257 |         ),
+258 |         font=dict(color="#888"),
+    |              ^^^^^^^^^^^^^^^^^^
+259 |         margin=dict(l=0, r=0, t=0, b=0),
+260 |         height=420,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\4_Explainability.py:259:16
+    |
+257 |         ),
+258 |         font=dict(color="#888"),
+259 |         margin=dict(l=0, r=0, t=0, b=0),
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+260 |         height=420,
+261 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> app\pages\5_Metrics.py:42:12
+   |
+41 |   def _layout(h=360):
+42 |       return dict(
+   |  ____________^
+43 | |         paper_bgcolor=CARD,
+44 | |         plot_bgcolor=BG,
+45 | |         font=dict(color=SUB, family="Inter", size=11),
+46 | |         margin=dict(l=15, r=15, t=40, b=15),
+47 | |         legend=dict(
+48 | |             bgcolor=CARD, bordercolor=BDR, borderwidth=1, font=dict(color=TEXT)
+49 | |         ),
+50 | |         height=h,
+51 | |     )
+   | |_____^
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> app\pages\5_Metrics.py:45:14
+   |
+43 |         paper_bgcolor=CARD,
+44 |         plot_bgcolor=BG,
+45 |         font=dict(color=SUB, family="Inter", size=11),
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+46 |         margin=dict(l=15, r=15, t=40, b=15),
+47 |         legend=dict(
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> app\pages\5_Metrics.py:46:16
+   |
+44 |         plot_bgcolor=BG,
+45 |         font=dict(color=SUB, family="Inter", size=11),
+46 |         margin=dict(l=15, r=15, t=40, b=15),
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+47 |         legend=dict(
+48 |             bgcolor=CARD, bordercolor=BDR, borderwidth=1, font=dict(color=TEXT)
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> app\pages\5_Metrics.py:47:16
+   |
+45 |           font=dict(color=SUB, family="Inter", size=11),
+46 |           margin=dict(l=15, r=15, t=40, b=15),
+47 |           legend=dict(
+   |  ________________^
+48 | |             bgcolor=CARD, bordercolor=BDR, borderwidth=1, font=dict(color=TEXT)
+49 | |         ),
+   | |_________^
+50 |           height=h,
+51 |       )
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> app\pages\5_Metrics.py:48:64
+   |
+46 |         margin=dict(l=15, r=15, t=40, b=15),
+47 |         legend=dict(
+48 |             bgcolor=CARD, bordercolor=BDR, borderwidth=1, font=dict(color=TEXT)
+   |                                                                ^^^^^^^^^^^^^^^^
+49 |         ),
+50 |         height=h,
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:173:22
+    |
+171 |                 mode="lines",
+172 |                 name=f"ROC  AUC={metrics.get('auc_roc', 0):.4f}",
+173 |                 line=dict(color=A1, width=2),
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^
+174 |                 fill="tozeroy",
+175 |                 fillcolor="rgba(165,249,239,0.06)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:185:24
+    |
+183 |                 mode="markers",
+184 |                 name="Youden's J",
+185 |                 marker=dict(color=A3, size=10, symbol="diamond"),
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+186 |             )
+187 |         )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:194:18
+    |
+192 |             mode="lines",
+193 |             name="Random",
+194 |             line=dict(color=BDR, dash="dash", width=1),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+195 |         )
+196 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:199:15
+    |
+197 |       fig.update_layout(
+198 |           **_layout(380),
+199 |           title=dict(
+    |  _______________^
+200 | |             text="Receiver Operating Characteristic", font=dict(color=SUB, size=12)
+201 | |         ),
+    | |_________^
+202 |           xaxis=dict(title="False Positive Rate", gridcolor=GRID, range=[0, 1]),
+203 |           yaxis=dict(title="True Positive Rate", gridcolor=GRID, range=[0, 1.02]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:200:60
+    |
+198 |         **_layout(380),
+199 |         title=dict(
+200 |             text="Receiver Operating Characteristic", font=dict(color=SUB, size=12)
+    |                                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+201 |         ),
+202 |         xaxis=dict(title="False Positive Rate", gridcolor=GRID, range=[0, 1]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:202:15
+    |
+200 |             text="Receiver Operating Characteristic", font=dict(color=SUB, size=12)
+201 |         ),
+202 |         xaxis=dict(title="False Positive Rate", gridcolor=GRID, range=[0, 1]),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+203 |         yaxis=dict(title="True Positive Rate", gridcolor=GRID, range=[0, 1.02]),
+204 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:203:15
+    |
+201 |         ),
+202 |         xaxis=dict(title="False Positive Rate", gridcolor=GRID, range=[0, 1]),
+203 |         yaxis=dict(title="True Positive Rate", gridcolor=GRID, range=[0, 1.02]),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+204 |     )
+205 |     st.plotly_chart(fig, use_container_width=True)
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:216:22
+    |
+214 |                 mode="lines",
+215 |                 name=f"PR  AUPRC={metrics.get('auprc', 0):.4f}",
+216 |                 line=dict(color=A2, width=2),
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^
+217 |                 fill="tozeroy",
+218 |                 fillcolor="rgba(220,68,60,0.06)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:234:18
+    |
+232 |             mode="lines",
+233 |             name="Prevalence",
+234 |             line=dict(color=BDR, dash="dot", width=1),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+235 |         )
+236 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:239:15
+    |
+237 |     fig.update_layout(
+238 |         **_layout(380),
+239 |         title=dict(text="Precision-Recall Curve", font=dict(color=SUB, size=12)),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+240 |         xaxis=dict(title="Recall", gridcolor=GRID, range=[0, 1]),
+241 |         yaxis=dict(title="Precision", gridcolor=GRID, range=[0, 1.02]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:239:56
+    |
+237 |     fig.update_layout(
+238 |         **_layout(380),
+239 |         title=dict(text="Precision-Recall Curve", font=dict(color=SUB, size=12)),
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^
+240 |         xaxis=dict(title="Recall", gridcolor=GRID, range=[0, 1]),
+241 |         yaxis=dict(title="Precision", gridcolor=GRID, range=[0, 1.02]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:240:15
+    |
+238 |         **_layout(380),
+239 |         title=dict(text="Precision-Recall Curve", font=dict(color=SUB, size=12)),
+240 |         xaxis=dict(title="Recall", gridcolor=GRID, range=[0, 1]),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+241 |         yaxis=dict(title="Precision", gridcolor=GRID, range=[0, 1.02]),
+242 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:241:15
+    |
+239 |         title=dict(text="Precision-Recall Curve", font=dict(color=SUB, size=12)),
+240 |         xaxis=dict(title="Recall", gridcolor=GRID, range=[0, 1]),
+241 |         yaxis=dict(title="Precision", gridcolor=GRID, range=[0, 1.02]),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+242 |     )
+243 |     st.plotly_chart(fig, use_container_width=True)
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:270:22
+    |
+268 |             colorscale=[[0, SURF], [1, A1]],
+269 |             showscale=False,
+270 |             textfont=dict(size=12, color=TEXT),
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+271 |         )
+272 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:275:15
+    |
+273 |     fig.update_layout(
+274 |         **_layout(380),
+275 |         title=dict(text="Confusion Matrix", font=dict(color=SUB, size=12)),
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+276 |         xaxis=dict(side="top"),
+277 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:275:50
+    |
+273 |     fig.update_layout(
+274 |         **_layout(380),
+275 |         title=dict(text="Confusion Matrix", font=dict(color=SUB, size=12)),
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+276 |         xaxis=dict(side="top"),
+277 |     )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:276:15
+    |
+274 |         **_layout(380),
+275 |         title=dict(text="Confusion Matrix", font=dict(color=SUB, size=12)),
+276 |         xaxis=dict(side="top"),
+    |               ^^^^^^^^^^^^^^^^
+277 |     )
+278 |     st.plotly_chart(fig, use_container_width=True)
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:323:26
+    |
+321 |                     mode="lines",
+322 |                     name=name,
+323 |                     line=dict(color=col, width=1.8),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+324 |                 )
+325 |             )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:332:29
+    |
+330 |             line_dash="dash",
+331 |             annotation_text=f"Optimal: {opt_t:.3f}",
+332 |             annotation_font=dict(color=A3, size=10),
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^
+333 |         )
+334 |         fig.update_layout(
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:336:19
+    |
+334 |           fig.update_layout(
+335 |               **_layout(380),
+336 |               title=dict(
+    |  ___________________^
+337 | |                 text="Metric vs Decision Threshold", font=dict(color=SUB, size=12)
+338 | |             ),
+    | |_____________^
+339 |               xaxis=dict(title="Threshold", gridcolor=GRID, range=[0, 1]),
+340 |               yaxis=dict(title="Score", gridcolor=GRID, range=[0, 1.02]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:337:59
+    |
+335 |             **_layout(380),
+336 |             title=dict(
+337 |                 text="Metric vs Decision Threshold", font=dict(color=SUB, size=12)
+    |                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+338 |             ),
+339 |             xaxis=dict(title="Threshold", gridcolor=GRID, range=[0, 1]),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:339:19
+    |
+337 |                 text="Metric vs Decision Threshold", font=dict(color=SUB, size=12)
+338 |             ),
+339 |             xaxis=dict(title="Threshold", gridcolor=GRID, range=[0, 1]),
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+340 |             yaxis=dict(title="Score", gridcolor=GRID, range=[0, 1.02]),
+341 |         )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\5_Metrics.py:340:19
+    |
+338 |             ),
+339 |             xaxis=dict(title="Threshold", gridcolor=GRID, range=[0, 1]),
+340 |             yaxis=dict(title="Score", gridcolor=GRID, range=[0, 1.02]),
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+341 |         )
+342 |         st.plotly_chart(fig, use_container_width=True)
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:310:26
+    |
+308 |                     theta=components + [components[0]],
+309 |                     fill="toself",
+310 |                     line=dict(color="#a5f9ef", width=1.5),
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+311 |                     fillcolor="rgba(165,249,239,0.08)",
+312 |                 )
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:315:23
+    |
+313 |               )
+314 |               radar.update_layout(
+315 |                   polar=dict(
+    |  _______________________^
+316 | |                     bgcolor="#0e0e0e",
+317 | |                     radialaxis=dict(
+318 | |                         range=[0, 1],
+319 | |                         tickfont=dict(size=8, color="#555"),
+320 | |                         gridcolor="rgba(255,255,255,0.05)",
+321 | |                         linecolor="rgba(255,255,255,0.05)",
+322 | |                     ),
+323 | |                     angularaxis=dict(
+324 | |                         tickfont=dict(size=10, color="#888"),
+325 | |                         gridcolor="rgba(255,255,255,0.05)",
+326 | |                         linecolor="rgba(255,255,255,0.05)",
+327 | |                     ),
+328 | |                 ),
+    | |_________________^
+329 |                   paper_bgcolor="#050505",
+330 |                   font=dict(color="#888", family="Inter"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:317:32
+    |
+315 |                   polar=dict(
+316 |                       bgcolor="#0e0e0e",
+317 |                       radialaxis=dict(
+    |  ________________________________^
+318 | |                         range=[0, 1],
+319 | |                         tickfont=dict(size=8, color="#555"),
+320 | |                         gridcolor="rgba(255,255,255,0.05)",
+321 | |                         linecolor="rgba(255,255,255,0.05)",
+322 | |                     ),
+    | |_____________________^
+323 |                       angularaxis=dict(
+324 |                           tickfont=dict(size=10, color="#888"),
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:319:34
+    |
+317 |                     radialaxis=dict(
+318 |                         range=[0, 1],
+319 |                         tickfont=dict(size=8, color="#555"),
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+320 |                         gridcolor="rgba(255,255,255,0.05)",
+321 |                         linecolor="rgba(255,255,255,0.05)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:323:33
+    |
+321 |                           linecolor="rgba(255,255,255,0.05)",
+322 |                       ),
+323 |                       angularaxis=dict(
+    |  _________________________________^
+324 | |                         tickfont=dict(size=10, color="#888"),
+325 | |                         gridcolor="rgba(255,255,255,0.05)",
+326 | |                         linecolor="rgba(255,255,255,0.05)",
+327 | |                     ),
+    | |_____________________^
+328 |                   ),
+329 |                   paper_bgcolor="#050505",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:324:34
+    |
+322 |                     ),
+323 |                     angularaxis=dict(
+324 |                         tickfont=dict(size=10, color="#888"),
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+325 |                         gridcolor="rgba(255,255,255,0.05)",
+326 |                         linecolor="rgba(255,255,255,0.05)",
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:330:22
+    |
+328 |                 ),
+329 |                 paper_bgcolor="#050505",
+330 |                 font=dict(color="#888", family="Inter"),
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+331 |                 margin=dict(l=30, r=30, t=20, b=20),
+332 |                 showlegend=False,
+    |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> app\pages\7_Full_Analysis.py:331:24
+    |
+329 |                 paper_bgcolor="#050505",
+330 |                 font=dict(color="#888", family="Inter"),
+331 |                 margin=dict(l=30, r=30, t=20, b=20),
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+332 |                 showlegend=False,
+333 |                 height=260,
+    |
+help: Rewrite as a literal
+
+BLE001 Do not catch blind exception: `Exception`
+   --> app\pages\7_Full_Analysis.py:425:24
+    |
+423 |                     else:
+424 |                         st.error("Internal Error: PDF generation returned empty bytes.")
+425 |                 except Exception as e:
+    |                        ^^^^^^^^^
+426 |                     import traceback
+    |
+
+RUF012 Mutable default value for class attribute
+   --> src\evaluation\engine.py:108:30
+    |
+106 |     """
+107 |
+108 |     CLASS_NAMES: list[str] = ["Healthy (0)", "ALL+ (1)"]
+    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+109 |
+110 |     # ΓöÇΓöÇ Construction ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    |
+help: Consider initializing in `__init__` or annotating with `typing.ClassVar`
+
+BLE001 Do not catch blind exception: `Exception`
+   --> src\evaluation\engine.py:471:16
+    |
+469 |             saved.update({f"conf_{k}": v for k, v in conf_plot_paths.items()})
+470 |
+471 |         except Exception as exc:  # never let confidence crash the main eval
+    |                ^^^^^^^^^
+472 |             logger.warning(f"  Confidence estimation skipped: {exc}")
+    |
+
+RUF022 `__all__` is not sorted
+  --> src\inference\__init__.py:50:11
+   |
+48 |   )
+49 |
+50 |   __all__ = [
+   |  ___________^
+51 | |     # Confidence
+52 | |     "ConfidenceEstimator",
+53 | |     "ConfidenceResult",
+54 | |     "RiskLevel",
+55 | |     # Pipeline
+56 | |     "InferencePipeline",
+57 | |     "PipelineResult",
+58 | |     "preprocess",
+59 | | ]
+   | |_^
+help: Apply an isort-style sorting to `__all__`
+
+RUF012 Mutable default value for class attribute
+   --> src\inference\confidence.py:106:18
+    |
+105 |       # Default confidence boundaries (can be overridden at construction time)
+106 |       THRESHOLDS = {
+    |  __________________^
+107 | |         "LOW": 0.80,  # c ΓëÑ 0.80 ΓåÆ LOW risk (trustworthy)
+108 | |         "MEDIUM": 0.55,  # 0.55 Γëñ c < 0.80 ΓåÆ MEDIUM risk
+109 | |         # c < 0.55 ΓåÆ HIGH risk (untrustworthy)
+110 | |     }
+    | |_____^
+111 |
+112 |       @classmethod
+    |
+help: Consider initializing in `__init__` or annotating with `typing.ClassVar`
+
+F841 Local variable `w_mc` is assigned to but never used
+   --> src\inference\confidence.py:544:9
+    |
+542 |         w_b = self._w_boundary / total_w
+543 |         w_e = self._w_entropy / total_w
+544 |         w_mc = 0.0
+    |         ^^^^
+545 |
+546 |         results = []
+    |
+help: Remove assignment to unused variable `w_mc`
+
+F841 Local variable `preds` is assigned to but never used
+   --> src\inference\confidence_viz.py:272:5
+    |
+270 |     confs = np.array([r.confidence for r in results])
+271 |     risks = [r.risk_level for r in results]
+272 |     preds = [r.prediction for r in results]
+    |     ^^^^^
+273 |
+274 |     fig, ax = plt.subplots(figsize=(9, 6))
+    |
+help: Remove assignment to unused variable `preds`
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> src\inference\confidence_viz.py:339:18
+    |
+337 |               fontsize=7.5,
+338 |               alpha=0.7,
+339 |               bbox=dict(
+    |  __________________^
+340 | |                 boxstyle="round,pad=0.3",
+341 | |                 fc=PALETTE["surface"],
+342 | |                 ec=PALETTE["border"],
+343 | |                 alpha=0.7,
+344 | |             ),
+    | |_____________^
+345 |           )
+    |
+help: Rewrite as a literal
+
+F841 Local variable `legend` is assigned to but never used
+   --> src\inference\confidence_viz.py:349:5
+    |
+347 |     ax.set_xlim(-0.02, 1.02)
+348 |     ax.set_ylim(-0.02, 1.05)
+349 |     legend = ax.legend(
+    |     ^^^^^^
+350 |         loc="lower center",
+351 |         ncol=3,
+    |
+help: Remove assignment to unused variable `legend`
+
+F841 Local variable `b` is assigned to but never used
+   --> src\inference\confidence_viz.py:439:9
+    |
+437 |     ):
+438 |         vals = [cls_counts[pred_cls][lv] for lv in levels]
+439 |         b = ax2.bar(
+    |         ^
+440 |             x + (i - 0.5) * bw,
+441 |             vals,
+    |
+help: Remove assignment to unused variable `b`
+
+RUF059 Unpacked variable `wedges` is never used
+   --> src\inference\confidence_viz.py:469:9
+    |
+467 |     if non_zero:
+468 |         counts_nz, labels_nz, colors_nz = zip(*non_zero)
+469 |         wedges, texts, autotexts = ax3.pie(
+    |         ^^^^^^
+470 |             counts_nz,
+471 |             labels=labels_nz,
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> src\inference\confidence_viz.py:476:24
+    |
+474 |             startangle=140,
+475 |             pctdistance=0.78,
+476 |             wedgeprops=dict(edgecolor=PALETTE["bg"], linewidth=1.5),
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+477 |         )
+478 |         for t in texts:
+    |
+help: Rewrite as a literal
+
+RUF007 Prefer `itertools.pairwise()` over `zip()` when iterating over successive pairs
+   --> src\inference\confidence_viz.py:607:19
+    |
+605 |     bin_counts = []
+606 |
+607 |     for lo, hi in zip(bin_edges[:-1], bin_edges[1:]):
+    |                   ^^^
+608 |         mask = (confs >= lo) & (confs < hi)
+609 |         if mask.sum() == 0:
+    |
+help: Replace `zip()` with `itertools.pairwise()`
+
+F841 Local variable `max_y` is assigned to but never used
+   --> src\inference\confidence_viz.py:947:5
+    |
+946 |     ys = np.arange(len(components)) * 1.2
+947 |     max_y = ys[-1]
+    |     ^^^^^
+948 |     for y, (name, val, col, annot) in zip(ys, components):
+949 |         ax_bd.barh(
+    |
+help: Remove assignment to unused variable `max_y`
+
+F401 `reportlab.graphics.renderPDF` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:57:36
+   |
+55 | # ΓöÇΓöÇ ReportLab imports ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+56 | try:
+57 |     from reportlab.graphics import renderPDF
+   |                                    ^^^^^^^^^
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+59 |     from reportlab.lib import colors
+   |
+help: Remove unused import: `reportlab.graphics.renderPDF`
+
+F401 `reportlab.graphics.shapes.Circle` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:58:43
+   |
+56 | try:
+57 |     from reportlab.graphics import renderPDF
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+   |                                           ^^^^^^
+59 |     from reportlab.lib import colors
+60 |     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
+   |
+help: Remove unused import
+
+F401 `reportlab.graphics.shapes.Drawing` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:58:51
+   |
+56 | try:
+57 |     from reportlab.graphics import renderPDF
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+   |                                                   ^^^^^^^
+59 |     from reportlab.lib import colors
+60 |     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
+   |
+help: Remove unused import
+
+F401 `reportlab.graphics.shapes.Rect` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:58:60
+   |
+56 | try:
+57 |     from reportlab.graphics import renderPDF
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+   |                                                            ^^^^
+59 |     from reportlab.lib import colors
+60 |     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
+   |
+help: Remove unused import
+
+F401 `reportlab.graphics.shapes.String` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:58:66
+   |
+56 | try:
+57 |     from reportlab.graphics import renderPDF
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+   |                                                                  ^^^^^^
+59 |     from reportlab.lib import colors
+60 |     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
+   |
+help: Remove unused import
+
+F401 `reportlab.lib.enums.TA_RIGHT` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:60:69
+   |
+58 |     from reportlab.graphics.shapes import Circle, Drawing, Rect, String
+59 |     from reportlab.lib import colors
+60 |     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
+   |                                                                     ^^^^^^^^
+61 |     from reportlab.lib.pagesizes import A4
+62 |     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+   |
+help: Remove unused import: `reportlab.lib.enums.TA_RIGHT`
+
+F401 `reportlab.lib.units.mm` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:63:41
+   |
+61 |     from reportlab.lib.pagesizes import A4
+62 |     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+63 |     from reportlab.lib.units import cm, mm
+   |                                         ^^
+64 |     from reportlab.lib.utils import ImageReader
+65 |     from reportlab.pdfgen import canvas
+   |
+help: Remove unused import: `reportlab.lib.units.mm`
+
+F401 `reportlab.lib.utils.ImageReader` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:64:37
+   |
+62 |     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+63 |     from reportlab.lib.units import cm, mm
+64 |     from reportlab.lib.utils import ImageReader
+   |                                     ^^^^^^^^^^^
+65 |     from reportlab.pdfgen import canvas
+66 |     from reportlab.platypus import (
+   |
+help: Remove unused import: `reportlab.lib.utils.ImageReader`
+
+F401 `reportlab.platypus.BaseDocTemplate` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:67:9
+   |
+65 |     from reportlab.pdfgen import canvas
+66 |     from reportlab.platypus import (
+67 |         BaseDocTemplate,
+   |         ^^^^^^^^^^^^^^^
+68 |         Frame,
+69 |         HRFlowable,
+   |
+help: Remove unused import
+
+F401 `reportlab.platypus.Frame` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:68:9
+   |
+66 |     from reportlab.platypus import (
+67 |         BaseDocTemplate,
+68 |         Frame,
+   |         ^^^^^
+69 |         HRFlowable,
+70 |         KeepTogether,
+   |
+help: Remove unused import
+
+F401 `reportlab.platypus.KeepTogether` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:70:9
+   |
+68 |         Frame,
+69 |         HRFlowable,
+70 |         KeepTogether,
+   |         ^^^^^^^^^^^^
+71 |         PageTemplate,
+72 |         Paragraph,
+   |
+help: Remove unused import
+
+F401 `reportlab.platypus.PageTemplate` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> src\reports\report_generator.py:71:9
+   |
+69 |         HRFlowable,
+70 |         KeepTogether,
+71 |         PageTemplate,
+   |         ^^^^^^^^^^^^
+72 |         Paragraph,
+73 |         Spacer,
+   |
+help: Remove unused import
+
+RUF059 Unpacked variable `page_w` is never used
+   --> src\reports\report_generator.py:440:9
+    |
+438 |         from reportlab.platypus import SimpleDocTemplate
+439 |
+440 |         page_w, page_h = A4
+    |         ^^^^^^
+441 |         margin = 1.8 * cm
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+RUF059 Unpacked variable `page_h` is never used
+   --> src\reports\report_generator.py:440:17
+    |
+438 |         from reportlab.platypus import SimpleDocTemplate
+439 |
+440 |         page_w, page_h = A4
+    |                 ^^^^^^
+441 |         margin = 1.8 * cm
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+F841 Local variable `bar_fill` is assigned to but never used
+   --> src\reports\report_generator.py:658:13
+    |
+656 |         def _bar_row(label: str, value: float, color_hex: str, note: str):
+657 |             bar_full = 8.0 * cm
+658 |             bar_fill = bar_full * max(0.0, min(1.0, value))
+    |             ^^^^^^^^
+659 |             bar_cell = (
+660 |                 f'<font color="{color_hex}">{"Γûê" * int(value * 40)}'
+    |
+help: Remove assignment to unused variable `bar_fill`
+
+F841 Local variable `base` is assigned to but never used
+   --> src\reports\report_generator.py:834:9
+    |
+833 |     def _styles(self) -> dict[str, ParagraphStyle]:
+834 |         base = getSampleStyleSheet()
+    |         ^^^^
+835 |         s = {}
+    |
+help: Remove assignment to unused variable `base`
+
+B006 Do not use mutable data structures for argument defaults
+   --> src\training\evaluator.py:117:30
+    |
+115 |     y_prob: np.ndarray,
+116 |     threshold: float | None = None,
+117 |     class_names: list[str] = ["Healthy (0)", "ALL+ (1)"],
+    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+118 | ) -> dict[str, Any]:
+119 |     """
+    |
+help: Replace with `None`; initialize within function
+
+F841 Local variable `precision` is assigned to but never used
+   --> src\training\evaluator.py:145:5
+    |
+143 |     sensitivity = tp / (tp + fn + 1e-8)  # True Positive Rate (Recall for +)
+144 |     specificity = tn / (tn + fp + 1e-8)  # True Negative Rate
+145 |     precision = tp / (tp + fp + 1e-8)  # Positive Predictive Value
+    |     ^^^^^^^^^
+146 |     npv = tn / (tn + fn + 1e-8)  # Negative Predictive Value
+147 |     fpr_thresh = fp / (fp + tn + 1e-8)  # False Positive Rate at threshold
+    |
+help: Remove assignment to unused variable `precision`
+
+RUF012 Mutable default value for class attribute
+   --> src\training\evaluator.py:249:19
+    |
+247 |     """
+248 |
+249 |     CLASS_NAMES = ["Healthy (0)", "ALL+ (1)"]
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+250 |
+251 |     def __init__(
+    |
+help: Consider initializing in `__init__` or annotating with `typing.ClassVar`
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+   --> src\training\visualizer.py:269:20
+    |
+267 |         color=PALETTE["accent3"],
+268 |         fontsize=8,
+269 |         arrowprops=dict(arrowstyle="->", color=PALETTE["accent3"], lw=1.0),
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+270 |     )
+    |
+help: Rewrite as a literal
+
+F841 Local variable `legend` is assigned to but never used
+   --> src\training\visualizer.py:275:5
+    |
+273 |     ax.set_xlim(-0.02, 1.02)
+274 |     ax.set_ylim(-0.02, 1.02)
+275 |     legend = ax.legend(
+    |     ^^^^^^
+276 |         loc="lower right",
+277 |         facecolor=PALETTE["surface"],
+    |
+help: Remove assignment to unused variable `legend`
+
+F841 Local variable `cols` is assigned to but never used
+   --> src\training\visualizer.py:492:5
+    |
+491 |     rows = []
+492 |     cols = ["Precision", "Recall", "F1-Score", "Support"]
+    |     ^^^^
+493 |
+494 |     for cls_name in class_names:
+    |
+help: Remove assignment to unused variable `cols`
+
+F841 Local variable `legend` is assigned to but never used
+   --> src\training\visualizer.py:671:5
+    |
+669 |     ax.set_xlim(0, 1)
+670 |     ax.set_ylim(0, 1.05)
+671 |     legend = ax.legend(
+    |     ^^^^^^
+672 |         loc="lower center",
+673 |         ncol=4,
+    |
+help: Remove assignment to unused variable `legend`
+
+F841 Local variable `legend` is assigned to but never used
+   --> src\training\visualizer.py:745:5
+    |
+743 |             ax.axvline(med, color=color, linewidth=1.0, linestyle=":", alpha=0.7)
+744 |
+745 |     legend = ax.legend(
+    |     ^^^^^^
+746 |         facecolor=PALETTE["surface"],
+747 |         edgecolor=PALETTE["border"],
+    |
+help: Remove assignment to unused variable `legend`
+
+RUF059 Unpacked variable `loaded_device` is never used
+   --> tests\test_model_loading.py:140:23
+    |
+138 |         from app.components.model_utils import load_model
+139 |
+140 |         loaded_model, loaded_device = load_model(str(tmp_checkpoint), str(device))
+    |                       ^^^^^^^^^^^^^
+141 |         assert loaded_model is not None
+142 |         assert isinstance(loaded_model, nn.Module)
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+RUF059 Unpacked variable `device_out` is never used
+   --> tests\test_model_loading.py:155:20
+    |
+153 |         from app.components.model_utils import load_model
+154 |
+155 |         model_out, device_out = load_model("/non/existent/path.pth", str(device))
+    |                    ^^^^^^^^^^
+156 |         assert model_out is None
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+B017 Do not assert blind exception: `Exception`
+   --> tests\test_model_loading.py:185:14
+    |
+183 |         from app.components.model_utils import load_model
+184 |
+185 |         with pytest.raises(Exception):
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^
+186 |             load_model(str(bad), str(device))
+    |
+
+F841 Local variable `x` is assigned to but never used
+   --> tests\test_pipeline.py:167:9
+    |
+165 |         """is_positive must agree with the prediction string."""
+166 |         pip = InferencePipeline(model=model, device=device)
+167 |         x = torch.ones(1, 3, 224, 224).to(device)
+    |         ^
+168 |         r = pip.run(Image.fromarray(np.ones((224, 224, 3), dtype=np.uint8)))
+169 |         assert r.is_positive == ("ALL" in r.prediction.upper())
+    |
+help: Remove assignment to unused variable `x`
+
+RUF059 Unpacked variable `orig_rgb` is never used
+  --> tests\test_preprocessing.py:58:17
+   |
+56 | class TestPreprocessOutputShapes:
+57 |     def test_tensor_shape_default_size(self, rand_pil):
+58 |         tensor, orig_rgb = preprocess(rand_pil, target_size=224)
+   |                 ^^^^^^^^
+59 |         assert tensor.shape == (1, 3, 224, 224), (
+60 |             f"Expected (1,3,224,224), got {tuple(tensor.shape)}"
+   |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+RUF059 Unpacked variable `orig` is never used
+  --> tests\test_preprocessing.py:83:17
+   |
+81 |     def test_tiny_input_resizes_correctly(self):
+82 |         tiny = make_pil(16, 16)
+83 |         tensor, orig = preprocess(tiny, target_size=224)
+   |                 ^^^^
+84 |         assert tensor.shape == (1, 3, 224, 224)
+   |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+Found 127 errors.
+No fixes available (108 hidden fixes can be enabled with the `--unsafe-fixes` option).

@@ -18,27 +18,25 @@ as constructor arguments (dependency injection). This makes every component
 independently unit-testable.
 """
 
+import logging
 import os
 import sys
 import time
-import logging
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, Optional, Any
+from pathlib import Path
+from typing import Any
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch import nn, optim
 from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from src.training.metrics import MetricAccumulator
-from src.training.early_stopping import EarlyStopping
 from src.training.checkpoint import CheckpointManager
+from src.training.early_stopping import EarlyStopping
+from src.training.metrics import MetricAccumulator
 
 logger = logging.getLogger("ALLTrainer")
 
@@ -46,6 +44,7 @@ logger = logging.getLogger("ALLTrainer")
 # ─────────────────────────────────────────────────────────────────────────────
 # Cosine Warm-Up Scheduler
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class CosineWarmupScheduler:
     """
@@ -60,16 +59,16 @@ class CosineWarmupScheduler:
 
     def __init__(
         self,
-        optimizer:      optim.Optimizer,
-        warmup_epochs:  int   = 3,
-        T_0:            int   = 10,
-        T_mult:         int   = 1,
-        min_lr:         float = 1e-6,
+        optimizer: optim.Optimizer,
+        warmup_epochs: int = 3,
+        T_0: int = 10,
+        T_mult: int = 1,
+        min_lr: float = 1e-6,
     ) -> None:
-        self.optimizer     = optimizer
+        self.optimizer = optimizer
         self.warmup_epochs = warmup_epochs
-        self.min_lr        = min_lr
-        self._base_lrs     = [pg["lr"] for pg in optimizer.param_groups]
+        self.min_lr = min_lr
+        self._base_lrs = [pg["lr"] for pg in optimizer.param_groups]
         self._cosine = optim.lr_scheduler.CosineAnnealingWarmRestarts(
             optimizer, T_0=T_0, T_mult=T_mult, eta_min=min_lr
         )
@@ -100,6 +99,7 @@ class CosineWarmupScheduler:
 # Trainer
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class Trainer:
     """
     Full training engine for the ALL detection model.
@@ -116,42 +116,42 @@ class Trainer:
 
     def __init__(
         self,
-        model:          nn.Module,
-        criterion:      nn.Module,
-        loaders:        Dict[str, DataLoader],
-        cfg:            Dict[str, Any],
-        device:         torch.device,
+        model: nn.Module,
+        criterion: nn.Module,
+        loaders: dict[str, DataLoader],
+        cfg: dict[str, Any],
+        device: torch.device,
         early_stopping: EarlyStopping,
         checkpoint_mgr: CheckpointManager,
     ) -> None:
-        self.model          = model
-        self.criterion      = criterion
-        self.loaders        = loaders
-        self.cfg            = cfg
-        self.device         = device
-        self.es             = early_stopping
-        self.ckpt           = checkpoint_mgr
+        self.model = model
+        self.criterion = criterion
+        self.loaders = loaders
+        self.cfg = cfg
+        self.device = device
+        self.es = early_stopping
+        self.ckpt = checkpoint_mgr
 
         # ── Config shortcuts ──────────────────────────────────────────────
-        self.train_cfg  = cfg["training"]
-        self.opt_cfg    = cfg["optimizer"]
-        self.sched_cfg  = cfg["scheduler"]
-        self.log_cfg    = cfg["logging"]
-        self.unfreeze   = cfg["model"]["unfreeze_schedule"]
-        self.ckpt_cfg   = cfg["checkpoint"]
+        self.train_cfg = cfg["training"]
+        self.opt_cfg = cfg["optimizer"]
+        self.sched_cfg = cfg["scheduler"]
+        self.log_cfg = cfg["logging"]
+        self.unfreeze = cfg["model"]["unfreeze_schedule"]
+        self.ckpt_cfg = cfg["checkpoint"]
 
         # ── Training state ────────────────────────────────────────────────
-        self.current_phase   = 1
-        self.current_epoch   = 0
-        self.best_threshold  = 0.50
-        self.history: Dict[str, list] = defaultdict(list)
+        self.current_phase = 1
+        self.current_epoch = 0
+        self.best_threshold = 0.50
+        self.history: dict[str, list] = defaultdict(list)
 
         # ── Mixed precision ───────────────────────────────────────────────
         self.use_amp = (
-            self.train_cfg.get("mixed_precision", False) and
-            self.device.type == "cuda"   # AMP is a no-op on CPU anyway
+            self.train_cfg.get("mixed_precision", False)
+            and self.device.type == "cuda"  # AMP is a no-op on CPU anyway
         )
-        self.scaler  = GradScaler(enabled=self.use_amp)
+        self.scaler = GradScaler(enabled=self.use_amp)
 
         # ── TensorBoard ───────────────────────────────────────────────────
         tb_dir = self.log_cfg.get("tensorboard_dir", "logs/tensorboard")
@@ -169,51 +169,51 @@ class Trainer:
 
     def _build_optimizer(self, phase: int) -> optim.Optimizer:
         """Build AdamW with per-phase param groups."""
-        param_groups = self.model.set_phase(phase)
+        param_groups = self.model.set_phase(phase)  # type: ignore
         # Apply weight decay and betas from config to every group
         for pg in param_groups:
             pg.setdefault("weight_decay", self.opt_cfg["weight_decay"])
         return optim.AdamW(
             param_groups,
-            betas   = tuple(self.opt_cfg["betas"]),
-            eps     = self.opt_cfg["eps"],
+            betas=tuple(self.opt_cfg["betas"]),
+            eps=self.opt_cfg["eps"],
         )
 
     def _build_scheduler(self) -> CosineWarmupScheduler:
         return CosineWarmupScheduler(
             self.optimizer,
-            warmup_epochs = self.sched_cfg["warmup_epochs"],
-            T_0           = self.sched_cfg["T_0"],
-            T_mult        = self.sched_cfg["T_mult"],
-            min_lr        = self.sched_cfg["min_lr"],
+            warmup_epochs=self.sched_cfg["warmup_epochs"],
+            T_0=self.sched_cfg["T_0"],
+            T_mult=self.sched_cfg["T_mult"],
+            min_lr=self.sched_cfg["min_lr"],
         )
 
     def _transition_phase(self, new_phase: int) -> None:
         """Switch to a new training phase — rebuilds optimizer + scheduler."""
         if new_phase == self.current_phase:
             return
-        logger.info(f"\n{'='*55}")
+        logger.info(f"\n{'=' * 55}")
         logger.info(f"  PHASE TRANSITION:  {self.current_phase} → {new_phase}")
-        logger.info(f"{'='*55}")
+        logger.info(f"{'=' * 55}")
         self.current_phase = new_phase
-        self.optimizer     = self._build_optimizer(phase=new_phase)
-        self.scheduler     = self._build_scheduler()
+        self.optimizer = self._build_optimizer(phase=new_phase)
+        self.scheduler = self._build_scheduler()
         self._log_param_counts()
 
     # ── Training Loop ─────────────────────────────────────────────────────
 
-    def _train_epoch(self) -> Dict[str, float]:
+    def _train_epoch(self) -> dict[str, float]:
         """Run one full training epoch. Returns epoch metrics."""
         self.model.train()
         accumulator = MetricAccumulator()
-        loader      = self.loaders["train"]
-        clip_norm   = self.train_cfg.get("gradient_clip", 1.0)
+        loader = self.loaders["train"]
+        clip_norm = self.train_cfg.get("gradient_clip", 1.0)
 
         pbar = tqdm(
             loader,
-            desc    = f"  Epoch {self.current_epoch:>3} [Train]",
-            ncols   = 90,
-            leave   = False,
+            desc=f"  Epoch {self.current_epoch:>3} [Train]",
+            ncols=90,
+            leave=False,
         )
 
         for batch_idx, batch in enumerate(pbar):
@@ -223,8 +223,8 @@ class Trainer:
 
             # ── Forward (with optional AMP) ─────────────────────────
             with autocast(enabled=self.use_amp):
-                logits = self.model(images)           # (B, 1)
-                loss   = self.criterion(logits, labels)
+                logits = self.model(images)  # (B, 1)
+                loss = self.criterion(logits, labels)
 
             # ── Backward ────────────────────────────────────────────
             self.scaler.scale(loss).backward()
@@ -249,14 +249,19 @@ class Trainer:
             # ── TensorBoard batch-level log ─────────────────────────
             global_step = (self.current_epoch - 1) * len(loader) + batch_idx
             if batch_idx % self.log_cfg.get("log_interval", 10) == 0:
-                self.writer.add_scalar("Batch/train_loss", float(loss.item()), global_step)
+                self.writer.add_scalar(
+                    "Batch/train_loss", float(loss.item()), global_step
+                )
 
                 if self.log_cfg.get("log_grad_norm", True):
-                    total_norm = sum(
-                        p.grad.data.norm(2).item() ** 2
-                        for p in self.model.parameters()
-                        if p.requires_grad and p.grad is not None
-                    ) ** 0.5
+                    total_norm = (
+                        sum(
+                            p.grad.data.norm(2).item() ** 2
+                            for p in self.model.parameters()
+                            if p.requires_grad and p.grad is not None
+                        )
+                        ** 0.5
+                    )
                     self.writer.add_scalar("Batch/grad_norm", total_norm, global_step)
 
         pbar.close()
@@ -265,17 +270,17 @@ class Trainer:
     # ── Validation / Test Loop ────────────────────────────────────────────
 
     @torch.no_grad()
-    def _eval_epoch(self, split: str = "val") -> Dict[str, float]:
+    def _eval_epoch(self, split: str = "val") -> dict[str, float]:
         """Run evaluation on val or test split."""
         self.model.eval()
         accumulator = MetricAccumulator()
-        loader      = self.loaders[split]
+        loader = self.loaders[split]
 
         pbar = tqdm(
             loader,
-            desc  = f"  Epoch {self.current_epoch:>3} [{split.capitalize():>4}]",
-            ncols = 90,
-            leave = False,
+            desc=f"  Epoch {self.current_epoch:>3} [{split.capitalize():>4}]",
+            ncols=90,
+            leave=False,
         )
 
         for batch in pbar:
@@ -285,7 +290,7 @@ class Trainer:
 
             with autocast(enabled=self.use_amp):
                 logits = self.model(images)
-                loss   = self.criterion(logits, labels)
+                loss = self.criterion(logits, labels)
 
             accumulator.update(logits, labels, float(loss.item()))
             pbar.set_postfix({"loss": f"{accumulator.compute_running_loss():.4f}"})
@@ -297,32 +302,29 @@ class Trainer:
 
     def _log_epoch_to_tensorboard(
         self,
-        train_metrics: Dict[str, float],
-        val_metrics:   Dict[str, float],
-        epoch:         int,
+        train_metrics: dict[str, float],
+        val_metrics: dict[str, float],
+        epoch: int,
     ) -> None:
         # Scalar groups
         metric_pairs = {
-            "Loss":        ("loss",        "loss"),
-            "AUC-ROC":     ("auc_roc",     "auc_roc"),
-            "Accuracy":    ("accuracy",    "accuracy"),
-            "F1":          ("f1",          "f1"),
+            "Loss": ("loss", "loss"),
+            "AUC-ROC": ("auc_roc", "auc_roc"),
+            "Accuracy": ("accuracy", "accuracy"),
+            "F1": ("f1", "f1"),
             "Sensitivity": ("sensitivity", "sensitivity"),
             "Specificity": ("specificity", "specificity"),
         }
         for tag, (tk, vk) in metric_pairs.items():
             self.writer.add_scalars(
                 f"Epoch/{tag}",
-                {"Train": train_metrics.get(tk, 0),
-                 "Val":   val_metrics.get(vk, 0)},
+                {"Train": train_metrics.get(tk, 0), "Val": val_metrics.get(vk, 0)},
                 epoch,
             )
 
         # Learning rates
         for i, pg in enumerate(self.optimizer.param_groups):
-            self.writer.add_scalar(
-                f"LR/group_{pg.get('name', i)}", pg["lr"], epoch
-            )
+            self.writer.add_scalar(f"LR/group_{pg.get('name', i)}", pg["lr"], epoch)
 
         # Optimal threshold
         self.writer.add_scalar(
@@ -338,8 +340,8 @@ class Trainer:
 
     def _update_history(
         self,
-        train_metrics: Dict[str, float],
-        val_metrics:   Dict[str, float],
+        train_metrics: dict[str, float],
+        val_metrics: dict[str, float],
     ) -> None:
         for k, v in train_metrics.items():
             if not k.startswith("_"):
@@ -355,12 +357,12 @@ class Trainer:
 
     def _print_epoch_summary(
         self,
-        train_m: Dict[str, float],
-        val_m:   Dict[str, float],
+        train_m: dict[str, float],
+        val_m: dict[str, float],
         elapsed: float,
     ) -> None:
         is_best = self.ckpt.best_epoch == self.current_epoch
-        star    = " ★ NEW BEST" if is_best else ""
+        star = " ★ NEW BEST" if is_best else ""
         logger.info(
             f"\n  Epoch {self.current_epoch:>3}/{self.cfg['training']['epochs']}  "
             f"[Phase {self.current_phase}]  [{elapsed:.1f}s]{star}"
@@ -383,24 +385,28 @@ class Trainer:
 
     # ── Main fit() Method ─────────────────────────────────────────────────
 
-    def fit(self) -> Dict[str, list]:
+    def fit(self) -> dict[str, list]:
         """
         Run the full training loop.
 
         Returns:
             Training history dict with per-epoch metrics.
         """
-        epochs          = self.train_cfg["epochs"]
-        phase1_end      = self.unfreeze["phase1_epochs"]
-        phase2_end      = phase1_end + self.unfreeze["phase2_epochs"]
+        epochs = self.train_cfg["epochs"]
+        phase1_end = self.unfreeze["phase1_epochs"]
+        phase2_end = phase1_end + self.unfreeze["phase2_epochs"]
 
-        logger.info("\n" + "="*55)
+        logger.info("\n" + "=" * 55)
         logger.info("  ALL DETECTION — TRAINING START")
-        logger.info(f"  Epochs: {epochs}  |  Device: {self.device}  |  AMP: {self.use_amp}")
+        logger.info(
+            f"  Epochs: {epochs}  |  Device: {self.device}  |  AMP: {self.use_amp}"
+        )
         logger.info(f"  Phase 1: epochs 1–{phase1_end}   (head only)")
-        logger.info(f"  Phase 2: epochs {phase1_end+1}–{phase2_end}  (unfreeze top blocks)")
-        logger.info(f"  Phase 3: epochs {phase2_end+1}–{epochs} (full fine-tune)")
-        logger.info("="*55)
+        logger.info(
+            f"  Phase 2: epochs {phase1_end + 1}–{phase2_end}  (unfreeze top blocks)"
+        )
+        logger.info(f"  Phase 3: epochs {phase2_end + 1}–{epochs} (full fine-tune)")
+        logger.info("=" * 55)
 
         for epoch in range(1, epochs + 1):
             self.current_epoch = epoch
@@ -426,14 +432,14 @@ class Trainer:
 
             # ── Checkpoint ───────────────────────────────────────────
             self.ckpt.save(
-                epoch          = epoch,
-                model          = self.model,
-                optimizer      = self.optimizer,
-                scheduler      = self.scheduler,
-                early_stopping = self.es,
-                metrics        = val_metrics,
-                history        = self.history,
-                current_phase  = self.current_phase,
+                epoch=epoch,
+                model=self.model,
+                optimizer=self.optimizer,
+                scheduler=self.scheduler,
+                early_stopping=self.es,
+                metrics=val_metrics,
+                history=self.history,
+                current_phase=self.current_phase,
             )
 
             # ── History & Logging ─────────────────────────────────────
@@ -451,38 +457,49 @@ class Trainer:
 
         # Save metrics history
         self.ckpt.save_metrics_json(
-            self.history,
-            path=self.cfg["output"]["metrics_file"]
+            self.history, path=self.cfg["output"]["metrics_file"]
         )
         self.writer.close()
 
-        logger.info("\n" + "="*55)
+        logger.info("\n" + "=" * 55)
         logger.info(f"  Training complete. Best epoch: {self.es.best_epoch}")
-        logger.info(f"  Best {self.cfg['early_stopping']['monitor']}: {self.es.best_value:.5f}")
-        logger.info("="*55)
+        logger.info(
+            f"  Best {self.cfg['early_stopping']['monitor']}: {self.es.best_value:.5f}"
+        )
+        logger.info("=" * 55)
 
         return dict(self.history)
 
     # ── Test Evaluation ───────────────────────────────────────────────────
 
-    def evaluate_test(self) -> Dict[str, float]:
+    def evaluate_test(self) -> dict[str, float]:
         """Run final evaluation on held-out test set."""
         logger.info("\n  Evaluating on test set...")
-        self.current_epoch = 0   # suppress epoch display
+        self.current_epoch = 0  # suppress epoch display
         test_metrics = self._eval_epoch("test")
         logger.info("\n  ── TEST RESULTS ──────────────────────────────")
-        for k in ["accuracy", "auc_roc", "auprc", "f1",
-                  "sensitivity", "specificity", "mcc", "optimal_threshold"]:
+        for k in [
+            "accuracy",
+            "auc_roc",
+            "auprc",
+            "f1",
+            "sensitivity",
+            "specificity",
+            "mcc",
+            "optimal_threshold",
+        ]:
             logger.info(f"  {k:>20}: {test_metrics.get(k, 0):.4f}")
-        logger.info(f"  {'Confusion':>20}: "
-                    f"TP={test_metrics['tp']} TN={test_metrics['tn']} "
-                    f"FP={test_metrics['fp']} FN={test_metrics['fn']}")
+        logger.info(
+            f"  {'Confusion':>20}: "
+            f"TP={test_metrics['tp']} TN={test_metrics['tn']} "
+            f"FP={test_metrics['fp']} FN={test_metrics['fn']}"
+        )
         return test_metrics
 
     # ── Introspection ─────────────────────────────────────────────────────
 
     def _log_param_counts(self) -> None:
-        p = self.model.count_parameters()
+        p = self.model.count_parameters()  # type: ignore
         logger.info(
             f"  Parameters — total: {p['total']:,}  "
             f"trainable: {p['trainable']:,}  "

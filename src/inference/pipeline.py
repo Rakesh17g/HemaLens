@@ -55,33 +55,34 @@ from __future__ import annotations
 
 import logging
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torchvision.transforms.functional as tvF
 from PIL import Image
+from torch import nn
 
 # ── project root on sys.path ──────────────────────────────────────────────────
 _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from src.inference.confidence import ConfidenceEstimator, ConfidenceResult
 from src.explainability.gradcam import GradCAM, GradCAMResult
+from src.inference.confidence import ConfidenceEstimator, ConfidenceResult
 
 logger = logging.getLogger("ALLPipeline")
 
 _IMAGENET_MEAN = [0.485, 0.456, 0.406]
-_IMAGENET_STD  = [0.229, 0.224, 0.225]
+_IMAGENET_STD = [0.229, 0.224, 0.225]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PipelineResult
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class PipelineResult:
@@ -91,54 +92,55 @@ class PipelineResult:
     All numpy arrays; no torch tensors.
     Safe for pickle / @st.cache_data / JSON (via to_dict).
     """
+
     # ── Input ─────────────────────────────────────────────────────────────────
-    original_rgb:   np.ndarray     # (H,W,3) uint8 — denormalised source image
-    filename:       str            # Original file name (or "unknown")
+    original_rgb: np.ndarray  # (H,W,3) uint8 — denormalised source image
+    filename: str  # Original file name (or "unknown")
 
     # ── Prediction ────────────────────────────────────────────────────────────
-    probability:    float          # sigmoid output ∈ [0,1]
-    prediction:     str            # "ALL+" | "Healthy"
-    confidence:     float          # combined confidence ∈ [0,1]
-    risk_level:     str            # "LOW" | "MEDIUM" | "HIGH"
-    clinical_note:  str
+    probability: float  # sigmoid output ∈ [0,1]
+    prediction: str  # "ALL+" | "Healthy"
+    confidence: float  # combined confidence ∈ [0,1]
+    risk_level: str  # "LOW" | "MEDIUM" | "HIGH"
+    clinical_note: str
     boundary_score: float
-    entropy_score:  float
-    mcdrop_score:   float
-    mcdrop_passes:  int
-    threshold:      float
-    weights:        Dict[str, float]
+    entropy_score: float
+    mcdrop_score: float
+    mcdrop_passes: int
+    threshold: float
+    weights: dict[str, float]
 
     # ── Grad-CAM ──────────────────────────────────────────────────────────────
-    heatmap:        np.ndarray     # (H,W) float32 [0,1]
-    colormap:       np.ndarray     # (H,W,3) uint8 MAGMA
-    overlay:        np.ndarray     # (H,W,3) uint8 50/50 blend
+    heatmap: np.ndarray  # (H,W) float32 [0,1]
+    colormap: np.ndarray  # (H,W,3) uint8 MAGMA
+    overlay: np.ndarray  # (H,W,3) uint8 50/50 blend
     gradcam_method: str
-    gradcam_layer:  int
+    gradcam_layer: int
 
     # ── Pipeline metadata ─────────────────────────────────────────────────────
-    image_size:     int            # e.g. 224
+    image_size: int  # e.g. 224
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return a flat dict of all scalar fields (numpy arrays excluded).
         Suitable for JSON serialisation.
         """
         return {
-            "filename":       self.filename,
-            "probability":    round(self.probability,  4),
-            "prediction":     self.prediction,
-            "confidence":     round(self.confidence,   4),
-            "risk_level":     self.risk_level,
-            "clinical_note":  self.clinical_note,
+            "filename": self.filename,
+            "probability": round(self.probability, 4),
+            "prediction": self.prediction,
+            "confidence": round(self.confidence, 4),
+            "risk_level": self.risk_level,
+            "clinical_note": self.clinical_note,
             "boundary_score": round(self.boundary_score, 4),
-            "entropy_score":  round(self.entropy_score,  4),
-            "mcdrop_score":   round(self.mcdrop_score,   4),
-            "mcdrop_passes":  self.mcdrop_passes,
-            "threshold":      round(self.threshold, 4),
-            "weights":        self.weights,
+            "entropy_score": round(self.entropy_score, 4),
+            "mcdrop_score": round(self.mcdrop_score, 4),
+            "mcdrop_passes": self.mcdrop_passes,
+            "threshold": round(self.threshold, 4),
+            "weights": self.weights,
             "gradcam_method": self.gradcam_method,
-            "gradcam_layer":  self.gradcam_layer,
-            "image_size":     self.image_size,
+            "gradcam_layer": self.gradcam_layer,
+            "image_size": self.image_size,
         }
 
     @property
@@ -154,10 +156,11 @@ class PipelineResult:
 # Preprocessing helper (module-level so it can be called standalone)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def preprocess(
-    pil_image:   Image.Image,
+    pil_image: Image.Image,
     target_size: int = 224,
-) -> Tuple[torch.Tensor, np.ndarray]:
+) -> tuple[torch.Tensor, np.ndarray]:
     """
     Resize + ImageNet-normalise a PIL image.
 
@@ -167,17 +170,19 @@ def preprocess(
       tensor       : (1,3,H,W) float32  ImageNet-normalised
       original_rgb : (H,W,3)   uint8    denormalised, for display
     """
-    img_res  = pil_image.convert("RGB").resize((target_size, target_size),
-                                               Image.BILINEAR)
+    img_res = pil_image.convert("RGB").resize(
+        (target_size, target_size), Image.BILINEAR  # type: ignore
+    )
     orig_rgb = np.array(img_res, dtype=np.uint8)
-    tensor   = tvF.to_tensor(img_res)
-    tensor   = tvF.normalize(tensor, _IMAGENET_MEAN, _IMAGENET_STD)
-    return tensor.unsqueeze(0), orig_rgb          # (1,3,H,W), (H,W,3)
+    tensor = tvF.to_tensor(img_res)
+    tensor = tvF.normalize(tensor, _IMAGENET_MEAN, _IMAGENET_STD)
+    return tensor.unsqueeze(0), orig_rgb  # (1,3,H,W), (H,W,3)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # InferencePipeline
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class InferencePipeline:
     """
@@ -198,35 +203,35 @@ class InferencePipeline:
 
     def __init__(
         self,
-        model:          nn.Module,
-        device:         torch.device,
-        threshold:      float = 0.50,
-        mc_passes:      int   = 0,
-        gradcam_method: str   = "gradcam",
-        gradcam_layer:  int   = 8,
-        use_amp:        bool  = False,
-        image_size:     int   = 224,
+        model: nn.Module,
+        device: torch.device,
+        threshold: float = 0.50,
+        mc_passes: int = 0,
+        gradcam_method: str = "gradcam",
+        gradcam_layer: int = 8,
+        use_amp: bool = False,
+        image_size: int = 224,
     ) -> None:
-        self.model          = model
-        self.device         = device
-        self.threshold      = threshold
-        self.mc_passes      = mc_passes
+        self.model = model
+        self.device = device
+        self.threshold = threshold
+        self.mc_passes = mc_passes
         self.gradcam_method = gradcam_method
-        self.gradcam_layer  = gradcam_layer
-        self.use_amp        = use_amp
-        self.image_size     = image_size
+        self.gradcam_layer = gradcam_layer
+        self.use_amp = use_amp
+        self.image_size = image_size
 
         # Instantiate sub-modules once; they're stateless between calls
         self._estimator = ConfidenceEstimator(
-            threshold         = threshold,
-            mc_dropout_passes = mc_passes,
-            use_amp           = use_amp,
+            threshold=threshold,
+            mc_dropout_passes=mc_passes,
+            use_amp=use_amp,
         )
         self._cam = GradCAM(
-            model        = model,
-            target_layer = gradcam_layer,
-            method       = gradcam_method,
-            device       = device,
+            model=model,
+            target_layer=gradcam_layer,
+            method=gradcam_method,
+            device=device,
         )
         logger.info(
             f"InferencePipeline ready | "
@@ -239,7 +244,7 @@ class InferencePipeline:
 
     def run(
         self,
-        image:    "Image.Image | np.ndarray",
+        image: Image.Image | np.ndarray,
         filename: str = "unknown",
     ) -> PipelineResult:
         """
@@ -273,46 +278,46 @@ class InferencePipeline:
         # ── Step 3: Grad-CAM ──────────────────────────────────────────────────
         cam: GradCAMResult = self._cam(tensor)
         logger.debug(
-            f"  gradcam max_activation={cam.heatmap.max():.4f} | "
-            f"method={cam.method}"
+            f"  gradcam max_activation={cam.heatmap.max():.4f} | method={cam.method}"
         )
 
         # ── Step 4: Assemble result ────────────────────────────────────────────
         return PipelineResult(
             # Input
-            original_rgb   = original_rgb,
-            filename       = filename,
+            original_rgb=original_rgb,
+            filename=filename,
             # Prediction
-            probability    = conf.probability,
-            prediction     = conf.prediction,
-            confidence     = conf.confidence,
-            risk_level     = conf.risk_level,
-            clinical_note  = conf.clinical_note,
-            boundary_score = conf.boundary_score,
-            entropy_score  = conf.entropy_score,
-            mcdrop_score   = conf.mcdrop_score,
-            mcdrop_passes  = conf.mcdrop_passes,
-            threshold      = conf.threshold,
-            weights        = conf.weights,
+            probability=conf.probability,
+            prediction=conf.prediction,
+            confidence=conf.confidence,
+            risk_level=conf.risk_level,
+            clinical_note=conf.clinical_note,
+            boundary_score=conf.boundary_score,
+            entropy_score=conf.entropy_score,
+            mcdrop_score=conf.mcdrop_score,
+            mcdrop_passes=conf.mcdrop_passes,
+            threshold=conf.threshold,
+            weights=conf.weights,
             # Grad-CAM
-            heatmap        = cam.heatmap,
-            colormap       = cam.colormap,
-            overlay        = cam.overlay,
-            gradcam_method = cam.method,
-            gradcam_layer  = self.gradcam_layer,
+            heatmap=cam.heatmap,
+            colormap=cam.colormap,
+            overlay=cam.overlay,
+            gradcam_method=cam.method,
+            gradcam_layer=self.gradcam_layer,
             # Meta
-            image_size     = self.image_size,
+            image_size=self.image_size,
         )
 
     def run_from_bytes(
         self,
         image_bytes: bytes,
-        filename:    str = "unknown",
+        filename: str = "unknown",
     ) -> PipelineResult:
         """
         Convenience wrapper — accepts raw image bytes (e.g. from
         st.file_uploader's .read()).
         """
         import io
+
         pil = Image.open(io.BytesIO(image_bytes))
         return self.run(pil, filename=filename)

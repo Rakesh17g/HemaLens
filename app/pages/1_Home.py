@@ -2,35 +2,41 @@
 Page 1 — HemaLens Landing Page
 Premium design with sticky navbar + functional routing
 """
-import sys, base64
+
+import base64
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import streamlit as st
 import torch
 
-# page config moved to app.py
+from app.components.model_utils import checkpoint_exists, init_session
 
-from app.components.styles import inject_css, ICONS
-from app.components.model_utils import init_session, checkpoint_exists
+# page config moved to app.py
+from app.components.styles import ICONS, inject_css
 
 inject_css(active="home")
 init_session()
+
 
 # ─── Image → base64 ──────────────────────────────────────────────────────────
 def _b64(rel: str) -> str:
     p = Path(__file__).resolve().parents[2] / rel
     return base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
 
-hero_src   = f"data:image/png;base64,{_b64('app/assets/hero.png')}"
+
+hero_src = f"data:image/png;base64,{_b64('app/assets/hero.png')}"
 normal_src = f"data:image/png;base64,{_b64('app/assets/normal.png')}"
 allpos_src = f"data:image/png;base64,{_b64('app/assets/all_positive.png')}"
 
 is_ckpt = checkpoint_exists()
-device  = "CUDA" if torch.cuda.is_available() else "CPU"
+device = "CUDA" if torch.cuda.is_available() else "CPU"
 
 # ─── Page-level style overrides ───────────────────────────────────────────────
-st.markdown("""
+st.markdown(
+    """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -180,16 +186,19 @@ st.markdown("""
 /* ── Hide streamlit bottom gap ── */
 [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"] { gap: 0 !important; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─── HERO ─────────────────────────────────────────────────────────────────────
 hero_img_html = (
     f'<img src="{hero_src}" alt="Blood smear microscopy" style="filter:brightness(0.88) saturate(1.05);">'
-    if hero_src else
-    '<div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 50%,#0d1f1e,#050505);"></div>'
+    if hero_src
+    else '<div style="width:100%;height:100%;background:radial-gradient(ellipse at 50% 50%,#0d1f1e,#050505);"></div>'
 )
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-hero">
 <!-- Left -->
 <div>
@@ -204,8 +213,8 @@ designed for Acute Lymphoblastic Leukemia research.
 <!-- status strip -->
 <div style="margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:2rem;flex-wrap:wrap;">
 <div style="display:flex;align-items:center;gap:6px;">
-<span style="width:6px;height:6px;border-radius:50%;background:{'#8fcdb7' if is_ckpt else '#444'};display:inline-block;"></span>
-<span style="font-size:0.68rem;color:#555;font-family:'Inter',sans-serif;">{'Model ready' if is_ckpt else 'Model not loaded'}</span>
+<span style="width:6px;height:6px;border-radius:50%;background:{"#8fcdb7" if is_ckpt else "#444"};display:inline-block;"></span>
+<span style="font-size:0.68rem;color:#555;font-family:'Inter',sans-serif;">{"Model ready" if is_ckpt else "Model not loaded"}</span>
 </div>
 <span style="font-size:0.68rem;color:#444;font-family:'Inter',sans-serif;">Device: {device}</span>
 <span style="font-size:0.68rem;color:#444;font-family:'Inter',sans-serif;">EfficientNet-B0</span>
@@ -237,13 +246,20 @@ EXAMPLE ANALYSIS — NOT A CLINICAL RESULT
 <div class="hl-badge">SCANNING<br><strong style="color:#f0f0f0;">224×224 px</strong></div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # CTA buttons under hero (Streamlit native for routing)
-st.markdown('<div style="padding: 0 5rem 4rem; max-width:1300px; margin:0 auto;">', unsafe_allow_html=True)
+st.markdown(
+    '<div style="padding: 0 5rem 4rem; max-width:1300px; margin:0 auto;">',
+    unsafe_allow_html=True,
+)
 cta_c1, cta_c2, cta_c3 = st.columns([2, 2, 8])
 with cta_c1:
-    if st.button("Launch HemaLens", key="cta_launch", type="primary", use_container_width=True):
+    if st.button(
+        "Launch HemaLens", key="cta_launch", type="primary", use_container_width=True
+    ):
         st.switch_page("pages/2_Upload.py")
 with cta_c2:
     if st.button("View Metrics", key="cta_metrics", use_container_width=True):
@@ -251,15 +267,27 @@ with cta_c2:
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ─── TRUST STRIP ──────────────────────────────────────────────────────────────
-items = ["EfficientNet-B0", "Grad-CAM · Grad-CAM++", "MC Dropout", "Focal Loss Training", "PDF Reports", "ALL-IDB2 Dataset"]
+items = [
+    "EfficientNet-B0",
+    "Grad-CAM · Grad-CAM++",
+    "MC Dropout",
+    "Focal Loss Training",
+    "PDF Reports",
+    "ALL-IDB2 Dataset",
+]
 strip_items = "".join(
     f'<span style="font-size:0.68rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;'
-    f'color:#444;font-family:Inter,sans-serif;">{i}</span>' for i in items
+    f'color:#444;font-family:Inter,sans-serif;">{i}</span>'
+    for i in items
 )
-st.markdown(f'<div class="hl-strip"><span style="font-size:0.6rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#333;font-family:Inter,sans-serif;flex-shrink:0;">RESEARCH TOOLS</span>{strip_items}</div>', unsafe_allow_html=True)
+st.markdown(
+    f'<div class="hl-strip"><span style="font-size:0.6rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#333;font-family:Inter,sans-serif;flex-shrink:0;">RESEARCH TOOLS</span>{strip_items}</div>',
+    unsafe_allow_html=True,
+)
 
 # ─── THE PROBLEM ──────────────────────────────────────────────────────────────
-st.markdown("""
+st.markdown(
+    """
 <div class="hl-section">
 <div class="hl-inner" style="text-align:center;max-width:760px;margin:0 auto;">
 <div class="hl-label">The Challenge</div>
@@ -273,27 +301,33 @@ AI-assisted screening can help triage and accelerate research review.
 </p>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─── HOW IT WORKS ─────────────────────────────────────────────────────────────
 steps = [
-    ("01", "Upload",     "Blood-smear microscopy image"),
+    ("01", "Upload", "Blood-smear microscopy image"),
     ("02", "Preprocess", "224×224 · ImageNet normalize"),
-    ("03", "Inference",  "EfficientNet-B0 forward pass"),
+    ("03", "Inference", "EfficientNet-B0 forward pass"),
     ("04", "Confidence", "Boundary · Entropy · MC Dropout"),
-    ("05", "Grad-CAM",   "Spatial attention heatmap"),
-    ("06", "Report",     "A4 PDF with disclaimer"),
+    ("05", "Grad-CAM", "Spatial attention heatmap"),
+    ("06", "Report", "A4 PDF with disclaimer"),
 ]
-cells = "".join(f"""
+cells = "".join(
+    f"""
 <div class="hl-pipeline-cell">
   <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.14em;color:#a5f9ef;
               font-family:'JetBrains Mono',monospace;margin-bottom:1rem;">{n}</div>
   <div style="font-size:0.9rem;font-weight:600;color:#f0f0f0;margin-bottom:0.4rem;
               font-family:'Inter',sans-serif;">{t}</div>
   <div style="font-size:0.74rem;color:#555;line-height:1.55;font-family:'Inter',sans-serif;">{d}</div>
-</div>""" for n, t, d in steps)
+</div>"""
+    for n, t, d in steps
+)
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section-dark">
 <div class="hl-inner">
 <div class="hl-label">How It Works</div>
@@ -302,23 +336,37 @@ st.markdown(f"""
 <div class="hl-pipeline">{cells}</div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Navigate to Full Analysis from pipeline
-st.markdown('<div style="padding:0 5rem;background:#080808;padding-bottom:3rem;">', unsafe_allow_html=True)
+st.markdown(
+    '<div style="padding:0 5rem;background:#080808;padding-bottom:3rem;">',
+    unsafe_allow_html=True,
+)
 _, btn_mid, _ = st.columns([4, 2, 4])
 with btn_mid:
-    if st.button("Open Full Analysis Pipeline →", key="open_pipeline", use_container_width=True):
+    if st.button(
+        "Open Full Analysis Pipeline →", key="open_pipeline", use_container_width=True
+    ):
         st.switch_page("pages/7_Full_Analysis.py")
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ─── MICROSCOPY COMPARISON ────────────────────────────────────────────────────
-normal_html = (f'<img src="{normal_src}" alt="Normal blood smear">' if normal_src else
-               '<div style="width:100%;height:300px;background:#0a1a12;"></div>')
-allpos_html = (f'<img src="{allpos_src}" alt="ALL+ blood smear">' if allpos_src else
-               '<div style="width:100%;height:300px;background:#1a0a0a;"></div>')
+normal_html = (
+    f'<img src="{normal_src}" alt="Normal blood smear">'
+    if normal_src
+    else '<div style="width:100%;height:300px;background:#0a1a12;"></div>'
+)
+allpos_html = (
+    f'<img src="{allpos_src}" alt="ALL+ blood smear">'
+    if allpos_src
+    else '<div style="width:100%;height:300px;background:#1a0a0a;"></div>'
+)
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section">
 <div class="hl-inner">
 <div class="hl-label">Microscopy Reference</div>
@@ -348,14 +396,20 @@ AI-generated reference images for illustration only. Not actual patient data.
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─── EXPLAINABILITY ───────────────────────────────────────────────────────────
-xai_img = (f'<img src="{hero_src}" style="width:100%;height:100%;object-fit:cover;'
-           f'filter:brightness(0.72) hue-rotate(340deg) saturate(1.3);">'
-           if hero_src else "")
+xai_img = (
+    f'<img src="{hero_src}" style="width:100%;height:100%;object-fit:cover;'
+    f'filter:brightness(0.72) hue-rotate(340deg) saturate(1.3);">'
+    if hero_src
+    else ""
+)
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section-dark">
 <div class="hl-inner" style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
 <div>
@@ -366,7 +420,7 @@ Grad-CAM generates a spatial attention heatmap, highlighting the cellular region
 that most influence the model's prediction. For ALL+ cases, activation concentrates
 over enlarged, irregular nuclei — morphological hallmarks of lymphoblastic cells.
 </p>
-{''.join(f'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:0.65rem;"><span style="color:#a5f9ef;flex-shrink:0;margin-top:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span><span style="font-size:0.84rem;color:#666;font-family:Inter,sans-serif;">{txt}</span></div>' for txt in ['Grad-CAM and Grad-CAM++ methods','Selectable EfficientNet feature layer (0–8)','MAGMA overlay · adjustable opacity · 3D surface'])}
+{"".join(f'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:0.65rem;"><span style="color:#a5f9ef;flex-shrink:0;margin-top:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span><span style="font-size:0.84rem;color:#666;font-family:Inter,sans-serif;">{txt}</span></div>' for txt in ["Grad-CAM and Grad-CAM++ methods", "Selectable EfficientNet feature layer (0–8)", "MAGMA overlay · adjustable opacity · 3D surface"])}
 </div>
 <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(220,68,60,0.15);aspect-ratio:4/3;box-shadow:0 0 60px rgba(220,68,60,0.06);">
 {xai_img}
@@ -375,10 +429,14 @@ over enlarged, irregular nuclei — morphological hallmarks of lymphoblastic cel
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Navigate to Explainability page
-st.markdown('<div style="padding:1.5rem 5rem 0;background:#080808;">', unsafe_allow_html=True)
+st.markdown(
+    '<div style="padding:1.5rem 5rem 0;background:#080808;">', unsafe_allow_html=True
+)
 _, gcam_mid, _ = st.columns([4, 2, 4])
 with gcam_mid:
     if st.button("Open Explainability →", key="open_gradcam", use_container_width=True):
@@ -387,21 +445,43 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 # ─── TECHNOLOGY ───────────────────────────────────────────────────────────────
 techs = [
-    ("EfficientNet-B0", "5.3M parameters · ImageNet pre-trained · fine-tuned for ALL binary classification on Wright-Giemsa stained blood smears."),
-    ("Confidence Estimation", "Three signals: boundary distance, predictive entropy, and MC Dropout variance — combined into a single trustworthiness score."),
-    ("Grad-CAM", "Visual attribution maps from EfficientNet feature layers. Supports Grad-CAM and Grad-CAM++ for better localisation of small structures."),
-    ("MC Dropout", "Monte Carlo Dropout with configurable stochastic forward passes to quantify epistemic uncertainty in model predictions."),
-    ("PDF Reports", "Auto-generated A4 medical PDF with image, heatmap, diagnosis, confidence breakdown, and full regulatory disclaimer."),
-    ("Full Pipeline", "End-to-end workflow with zero code duplication via InferencePipeline — every stage cached with st.cache_data."),
+    (
+        "EfficientNet-B0",
+        "5.3M parameters · ImageNet pre-trained · fine-tuned for ALL binary classification on Wright-Giemsa stained blood smears.",
+    ),
+    (
+        "Confidence Estimation",
+        "Three signals: boundary distance, predictive entropy, and MC Dropout variance — combined into a single trustworthiness score.",
+    ),
+    (
+        "Grad-CAM",
+        "Visual attribution maps from EfficientNet feature layers. Supports Grad-CAM and Grad-CAM++ for better localisation of small structures.",
+    ),
+    (
+        "MC Dropout",
+        "Monte Carlo Dropout with configurable stochastic forward passes to quantify epistemic uncertainty in model predictions.",
+    ),
+    (
+        "PDF Reports",
+        "Auto-generated A4 medical PDF with image, heatmap, diagnosis, confidence breakdown, and full regulatory disclaimer.",
+    ),
+    (
+        "Full Pipeline",
+        "End-to-end workflow with zero code duplication via InferencePipeline — every stage cached with st.cache_data.",
+    ),
 ]
-tech_html = "".join(f"""
+tech_html = "".join(
+    f"""
 <div class="hl-tech-cell">
   <div style="font-size:0.85rem;font-weight:600;color:#f0f0f0;margin-bottom:0.5rem;
               font-family:'Inter',sans-serif;letter-spacing:-0.01em;">{t}</div>
   <div style="font-size:0.78rem;color:#555;line-height:1.65;font-family:'Inter',sans-serif;">{d}</div>
-</div>""" for t, d in techs)
+</div>"""
+    for t, d in techs
+)
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section">
 <div class="hl-inner">
 <div class="hl-label">Technology</div>
@@ -409,20 +489,30 @@ st.markdown(f"""
 <div class="hl-tech">{tech_html}</div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─── METRICS ──────────────────────────────────────────────────────────────────
-m_data = [("0.991","AUC-ROC","#a5f9ef"), ("96.3%","F1 Score","#f0f0f0"),
-          ("95.5%","Sensitivity","#8fcdb7"), ("96.3%","Specificity","#f0f0f0")]
-m_html = "".join(f"""
+m_data = [
+    ("0.991", "AUC-ROC", "#a5f9ef"),
+    ("96.3%", "F1 Score", "#f0f0f0"),
+    ("95.5%", "Sensitivity", "#8fcdb7"),
+    ("96.3%", "Specificity", "#f0f0f0"),
+]
+m_html = "".join(
+    f"""
 <div class="hl-metric-cell">
   <div style="font-size:2.8rem;font-weight:800;color:{c};letter-spacing:-0.03em;
               font-family:'Inter',sans-serif;margin-bottom:0.5rem;">{v}</div>
   <div style="font-size:0.65rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;
               color:#444;font-family:'Inter',sans-serif;">{l}</div>
-</div>""" for v, l, c in m_data)
+</div>"""
+    for v, l, c in m_data
+)
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section-dark">
 <div class="hl-inner">
 <div class="hl-label">Research Metrics</div>
@@ -433,18 +523,25 @@ Reported on ALL-IDB2 public dataset. Reference values only — not a clinical pe
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Navigate to Metrics
-st.markdown('<div style="padding:1.5rem 5rem 0;background:#080808;">', unsafe_allow_html=True)
+st.markdown(
+    '<div style="padding:1.5rem 5rem 0;background:#080808;">', unsafe_allow_html=True
+)
 _, m_mid, _ = st.columns([4, 2, 4])
 with m_mid:
-    if st.button("Open Metrics Dashboard →", key="open_metrics", use_container_width=True):
+    if st.button(
+        "Open Metrics Dashboard →", key="open_metrics", use_container_width=True
+    ):
         st.switch_page("pages/5_Metrics.py")
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ─── DISCLAIMER ───────────────────────────────────────────────────────────────
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-section">
 <div class="hl-inner">
 <div style="background:rgba(157,114,80,0.06);border:1px solid rgba(157,114,80,0.18);border-radius:10px;padding:1.4rem 1.75rem;display:flex;gap:1rem;align-items:flex-start;">
@@ -458,10 +555,13 @@ All results must be reviewed by a qualified haematopathologist before any clinic
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─── FOOTER ───────────────────────────────────────────────────────────────────
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hl-footer">
   <div style="display:flex;align-items:center;gap:10px;">
     {ICONS["logo"]}
@@ -473,25 +573,30 @@ st.markdown(f"""
     </div>
   </div>
   <div style="display:flex;gap:2rem;align-items:center;">
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 fc1, fc2, fc3, fc4, fc5 = st.columns(5)
 fp = [
-    (fc1, "Upload",       "pages/2_Upload.py"),
-    (fc2, "Prediction",   "pages/3_Prediction.py"),
-    (fc3, "Explainability","pages/4_Explainability.py"),
-    (fc4, "Metrics",      "pages/5_Metrics.py"),
-    (fc5, "About",        "pages/6_About.py"),
+    (fc1, "Upload", "pages/2_Upload.py"),
+    (fc2, "Prediction", "pages/3_Prediction.py"),
+    (fc3, "Explainability", "pages/4_Explainability.py"),
+    (fc4, "Metrics", "pages/5_Metrics.py"),
+    (fc5, "About", "pages/6_About.py"),
 ]
 for col, label, page_path in fp:
     with col:
         if st.button(label, key=f"footer_{label}"):
             st.switch_page(page_path)
 
-st.markdown("""
+st.markdown(
+    """
   </div>
   <div style="font-size:0.68rem;color:#333;font-family:'Inter',sans-serif;margin-top:0.5rem;width:100%;text-align:center;">
     Built with PyTorch · Streamlit · ReportLab · 2026 · Research Use Only
   </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)

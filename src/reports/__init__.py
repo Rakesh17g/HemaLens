@@ -44,13 +44,13 @@ One-call convenience
 """
 
 from src.reports.report_generator import (
-    MedicalReportGenerator,
     MedicalReportData,
+    MedicalReportGenerator,
     build_report,
 )
 
 __all__ = [
-    "MedicalReportGenerator",
     "MedicalReportData",
+    "MedicalReportGenerator",
     "build_report",
 ]

@@ -34,7 +34,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
 
 import numpy as np
 import streamlit as st
@@ -49,12 +48,13 @@ if str(ROOT) not in sys.path:
 logger = logging.getLogger("ALLApp")
 
 _IMAGENET_MEAN = [0.485, 0.456, 0.406]
-_IMAGENET_STD  = [0.229, 0.224, 0.225]
+_IMAGENET_STD = [0.229, 0.224, 0.225]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Model loader  (@st.cache_resource — lives for the entire session)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @st.cache_resource(show_spinner=False)
 def load_model(checkpoint_path: str, device_name: str = "cpu"):
@@ -91,10 +91,11 @@ def get_device() -> str:
 # Image preprocessing (shared helper — no caching, cheap operation)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def preprocess_image(
-    pil_image:   Image.Image,
+    pil_image: Image.Image,
     target_size: int = 224,
-) -> Tuple[torch.Tensor, np.ndarray]:
+) -> tuple[torch.Tensor, np.ndarray]:
     """
     Resize + ImageNet-normalise a PIL image.
 
@@ -104,11 +105,12 @@ def preprocess_image(
       tensor       : (1,3,H,W) float32 normalised
       original_rgb : (H,W,3)   uint8   for display
     """
-    img_res  = pil_image.convert("RGB").resize((target_size, target_size),
-                                               Image.BILINEAR)
-    orig     = np.array(img_res, dtype=np.uint8)
-    tensor   = tvF.to_tensor(img_res)
-    tensor   = tvF.normalize(tensor, _IMAGENET_MEAN, _IMAGENET_STD)
+    img_res = pil_image.convert("RGB").resize(
+        (target_size, target_size), Image.BILINEAR  # type: ignore
+    )
+    orig = np.array(img_res, dtype=np.uint8)
+    tensor = tvF.to_tensor(img_res)
+    tensor = tvF.normalize(tensor, _IMAGENET_MEAN, _IMAGENET_STD)
     return tensor.unsqueeze(0), orig
 
 
@@ -116,15 +118,16 @@ def preprocess_image(
 # Full pipeline  (@st.cache_data — cached per (bytes, settings) tuple)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @st.cache_data(show_spinner=False)
 def run_full_pipeline(
-    image_bytes:    bytes,
-    checkpoint:     str,
-    threshold:      float = 0.50,
-    mc_passes:      int   = 0,
-    gradcam_method: str   = "gradcam",
-    gradcam_layer:  int   = 8,
-    filename:       str   = "unknown",
+    image_bytes: bytes,
+    checkpoint: str,
+    threshold: float = 0.50,
+    mc_passes: int = 0,
+    gradcam_method: str = "gradcam",
+    gradcam_layer: int = 8,
+    filename: str = "unknown",
 ) -> dict:
     """
     Execute the complete Upload→Preprocess→Predict→GradCAM workflow.
@@ -144,44 +147,44 @@ def run_full_pipeline(
     """
     from src.inference.pipeline import InferencePipeline
 
-    device_name    = get_device()
-    model, device  = load_model(checkpoint, device_name)
+    device_name = get_device()
+    model, device = load_model(checkpoint, device_name)
     if model is None:
         return {"error": f"Checkpoint not found: {checkpoint}"}
 
     pipeline = InferencePipeline(
-        model          = model,
-        device         = device,
-        threshold      = threshold,
-        mc_passes      = mc_passes,
-        gradcam_method = gradcam_method,
-        gradcam_layer  = gradcam_layer,
+        model=model,
+        device=device,
+        threshold=threshold,
+        mc_passes=mc_passes,
+        gradcam_method=gradcam_method,
+        gradcam_layer=gradcam_layer,
     )
 
     result = pipeline.run_from_bytes(image_bytes, filename=filename)
 
     return {
         # scalars
-        "filename":       result.filename,
-        "probability":    result.probability,
-        "prediction":     result.prediction,
-        "confidence":     result.confidence,
-        "risk_level":     result.risk_level,
-        "clinical_note":  result.clinical_note,
+        "filename": result.filename,
+        "probability": result.probability,
+        "prediction": result.prediction,
+        "confidence": result.confidence,
+        "risk_level": result.risk_level,
+        "clinical_note": result.clinical_note,
         "boundary_score": result.boundary_score,
-        "entropy_score":  result.entropy_score,
-        "mcdrop_score":   result.mcdrop_score,
-        "mcdrop_passes":  result.mcdrop_passes,
-        "threshold":      result.threshold,
-        "weights":        result.weights,
+        "entropy_score": result.entropy_score,
+        "mcdrop_score": result.mcdrop_score,
+        "mcdrop_passes": result.mcdrop_passes,
+        "threshold": result.threshold,
+        "weights": result.weights,
         "gradcam_method": result.gradcam_method,
-        "gradcam_layer":  result.gradcam_layer,
-        "image_size":     result.image_size,
+        "gradcam_layer": result.gradcam_layer,
+        "image_size": result.image_size,
         # arrays
-        "original_rgb":   result.original_rgb,
-        "heatmap":        result.heatmap,
-        "colormap":       result.colormap,
-        "overlay":        result.overlay,
+        "original_rgb": result.original_rgb,
+        "heatmap": result.heatmap,
+        "colormap": result.colormap,
+        "overlay": result.overlay,
     }
 
 
@@ -189,13 +192,14 @@ def run_full_pipeline(
 # PDF bytes  (@st.cache_data)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 # @st.cache_data(show_spinner=False)  # DO NOT USE CACHE FOR PDF GENERATION; causes zombie failures
 def generate_pdf_bytes(
     pipeline_result_dict: dict,
-    patient_id:    str = "ANON",
-    sample_id:     str = "N/A",
-    institution:   str = "ALL Detection AI System",
-    analyst:       str = "AI Diagnostic Assistant",
+    patient_id: str = "ANON",
+    sample_id: str = "N/A",
+    institution: str = "ALL Detection AI System",
+    analyst: str = "AI Diagnostic Assistant",
     model_version: str = "EfficientNet-B0 v1.0",
 ) -> bytes:
     """
@@ -216,24 +220,26 @@ def generate_pdf_bytes(
         # to use from_pipeline_result() without importing the dataclass
         class _Proxy:
             pass
+
         pr = _Proxy()
         for k, v in pipeline_result_dict.items():
             setattr(pr, k, v)
 
         data = MedicalReportData.from_pipeline_result(
             pr,
-            patient_id    = patient_id,
-            sample_id     = sample_id,
-            institution   = institution,
-            analyst       = analyst,
-            model_version = model_version,
+            patient_id=patient_id,
+            sample_id=sample_id,
+            institution=institution,
+            analyst=analyst,
+            model_version=model_version,
         )
-        gen = MedicalReportGenerator(output_dir="/tmp")   # dir unused for bytes
+        gen = MedicalReportGenerator(output_dir="/tmp")  # dir unused for bytes
         return gen.generate_bytes(data)
 
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import traceback
-        st.error(f"Generate PDF Bytes Failed: {repr(exc)}\n{traceback.format_exc()}")
+
+        st.error(f"Generate PDF Bytes Failed: {exc!r}\n{traceback.format_exc()}")
         logger.error(f"PDF generation failed: {exc}")
         return b""
 
@@ -242,17 +248,18 @@ def generate_pdf_bytes(
 # Legacy per-feature functions (kept for existing pages 3 & 4)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @st.cache_data(show_spinner=False)
 def run_prediction(
     image_bytes: bytes,
-    checkpoint:  str,
-    threshold:   float = 0.50,
-    mc_passes:   int   = 0,
+    checkpoint: str,
+    threshold: float = 0.50,
+    mc_passes: int = 0,
 ) -> dict:
     """Confidence estimation only — used by page 3 (Prediction)."""
     from src.inference import ConfidenceEstimator
 
-    device_name   = get_device()
+    device_name = get_device()
     model, device = load_model(checkpoint, device_name)
     if model is None:
         return {"error": f"Checkpoint not found: {checkpoint}"}
@@ -260,36 +267,35 @@ def run_prediction(
     pil = Image.open(io.BytesIO(image_bytes))
     tensor, orig_rgb = preprocess_image(pil)
 
-    estimator = ConfidenceEstimator(threshold=threshold,
-                                    mc_dropout_passes=mc_passes)
+    estimator = ConfidenceEstimator(threshold=threshold, mc_dropout_passes=mc_passes)
     r = estimator.estimate(model, tensor, device=device)
 
     return {
-        "probability":    r.probability,
-        "prediction":     r.prediction,
-        "confidence":     r.confidence,
-        "risk_level":     r.risk_level,
+        "probability": r.probability,
+        "prediction": r.prediction,
+        "confidence": r.confidence,
+        "risk_level": r.risk_level,
         "boundary_score": r.boundary_score,
-        "entropy_score":  r.entropy_score,
-        "mcdrop_score":   r.mcdrop_score,
-        "mcdrop_passes":  r.mcdrop_passes,
-        "clinical_note":  r.clinical_note,
-        "threshold":      r.threshold,
-        "original_rgb":   orig_rgb,
+        "entropy_score": r.entropy_score,
+        "mcdrop_score": r.mcdrop_score,
+        "mcdrop_passes": r.mcdrop_passes,
+        "clinical_note": r.clinical_note,
+        "threshold": r.threshold,
+        "original_rgb": orig_rgb,
     }
 
 
 @st.cache_data(show_spinner=False)
 def run_gradcam(
     image_bytes: bytes,
-    checkpoint:  str,
-    layer:       int = 8,
-    method:      str = "gradcam",
+    checkpoint: str,
+    layer: int = 8,
+    method: str = "gradcam",
 ) -> dict:
     """GradCAM only — used by page 4 (GradCAM Visualization)."""
     from src.explainability import GradCAM
 
-    device_name   = get_device()
+    device_name = get_device()
     model, device = load_model(checkpoint, device_name)
     if model is None:
         return {"error": f"Checkpoint not found: {checkpoint}"}
@@ -297,16 +303,16 @@ def run_gradcam(
     pil = Image.open(io.BytesIO(image_bytes))
     tensor, _ = preprocess_image(pil)
 
-    cam    = GradCAM(model, target_layer=layer, method=method, device=device)
+    cam = GradCAM(model, target_layer=layer, method=method, device=device)
     result = cam(tensor)
 
     return {
-        "original":    result.original,
-        "heatmap":     result.heatmap,
-        "colormap":    result.colormap,
-        "overlay":     result.overlay,
+        "original": result.original,
+        "heatmap": result.heatmap,
+        "colormap": result.colormap,
+        "overlay": result.overlay,
         "probability": result.probability,
-        "method":      result.method,
+        "method": result.method,
     }
 
 
@@ -314,26 +320,27 @@ def run_gradcam(
 # Session state helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def init_session() -> None:
     """Seed all session_state keys with safe defaults (idempotent)."""
     defaults = {
-        "uploaded_bytes":     None,
-        "uploaded_filename":  None,
-        "checkpoint_path":    "models/checkpoints/efficientnet_b0_best.pth",
-        "threshold":          0.50,
-        "mc_passes":          0,
-        "gradcam_layer":      8,
-        "gradcam_method":     "gradcam",
-        "prediction_result":  None,
-        "gradcam_result":     None,
-        "pipeline_result":    None,   # ← new: full pipeline result
-        "eval_metrics":       None,
+        "uploaded_bytes": None,
+        "uploaded_filename": None,
+        "checkpoint_path": "models/checkpoints/efficientnet_b0_best.pth",
+        "threshold": 0.50,
+        "mc_passes": 0,
+        "gradcam_layer": 8,
+        "gradcam_method": "gradcam",
+        "prediction_result": None,
+        "gradcam_result": None,
+        "pipeline_result": None,  # ← new: full pipeline result
+        "eval_metrics": None,
         # report metadata
-        "patient_id":         "ANON",
-        "sample_id":          "N/A",
-        "analyst":            "AI Diagnostic Assistant",
-        "institution":        "ALL Detection AI System",
-        "model_version":      "EfficientNet-B0 v1.0",
+        "patient_id": "ANON",
+        "sample_id": "N/A",
+        "analyst": "AI Diagnostic Assistant",
+        "institution": "ALL Detection AI System",
+        "model_version": "EfficientNet-B0 v1.0",
     }
     for k, v in defaults.items():
         if k not in st.session_state:

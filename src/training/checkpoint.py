@@ -13,14 +13,13 @@ resumed exactly from any checkpoint:
   - full training history (loss/metrics per epoch)
 """
 
-import os
 import json
 import logging
-from typing import Any, Dict, Optional
+import os
+from typing import Any
 
 import torch
-import torch.nn as nn
-
+from torch import nn
 
 logger = logging.getLogger("ALLTrainer")
 
@@ -40,19 +39,19 @@ class CheckpointManager:
 
     def __init__(
         self,
-        checkpoint_dir:  str  = "models/checkpoints",
-        monitor:         str  = "val_auc",
-        mode:            str  = "max",
-        save_best_only:  bool = True,
-        save_last:       bool = True,
-        filename:        str  = "efficientnet_b0_best.pth",
+        checkpoint_dir: str = "models/checkpoints",
+        monitor: str = "val_auc",
+        mode: str = "max",
+        save_best_only: bool = True,
+        save_last: bool = True,
+        filename: str = "efficientnet_b0_best.pth",
     ) -> None:
         self.checkpoint_dir = checkpoint_dir
-        self.monitor        = monitor
-        self.mode           = mode
+        self.monitor = monitor
+        self.mode = mode
         self.save_best_only = save_best_only
-        self.save_last      = save_last
-        self.filename       = filename
+        self.save_last = save_last
+        self.filename = filename
 
         self.best_value = float("-inf") if mode == "max" else float("inf")
         self.best_epoch = 0
@@ -74,37 +73,40 @@ class CheckpointManager:
 
     def save(
         self,
-        epoch:          int,
-        model:          nn.Module,
-        optimizer:      torch.optim.Optimizer,
-        scheduler:      Any,
+        epoch: int,
+        model: nn.Module,
+        optimizer: torch.optim.Optimizer,
+        scheduler: Any,
         early_stopping: Any,
-        metrics:        Dict[str, float],
-        history:        Dict[str, list],
-        current_phase:  int,
+        metrics: dict[str, float],
+        history: dict[str, list],
+        current_phase: int,
     ) -> bool:
         """
         Save checkpoint. Returns True if this was a new best.
 
         Saves a comprehensive state that allows full training resumption.
         """
-        value    = metrics.get(self.monitor, 0.0)
-        is_best  = self._is_best(value)
+        value = metrics.get(self.monitor, 0.0)
+        is_best = self._is_best(value)
 
         state = {
             # ── Core training state ─────────────────────────────────
-            "epoch":            epoch,
-            "current_phase":    current_phase,
+            "epoch": epoch,
+            "current_phase": current_phase,
             "model_state_dict": {k: v.cpu() for k, v in model.state_dict().items()},
             "optimizer_state_dict": optimizer.state_dict(),
-            "scheduler_state_dict": scheduler.state_dict() if hasattr(scheduler, "state_dict") else {},
+            "scheduler_state_dict": scheduler.state_dict()
+            if hasattr(scheduler, "state_dict")
+            else {},
             "early_stopping_state": early_stopping.state_dict(),
             # ── Performance snapshot ────────────────────────────────
             "best_metric_value": self.best_value,
-            "best_epoch":        self.best_epoch,
-            "current_metrics":   {k: v for k, v in metrics.items()
-                                   if not k.startswith("_")},  # skip raw arrays
-            "history":           history,
+            "best_epoch": self.best_epoch,
+            "current_metrics": {
+                k: v for k, v in metrics.items() if not k.startswith("_")
+            },  # skip raw arrays
+            "history": history,
         }
 
         # Always save last
@@ -129,8 +131,8 @@ class CheckpointManager:
 
     def load(
         self,
-        path: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        path: str | None = None,
+    ) -> dict[str, Any]:
         """
         Load a checkpoint from disk.
 
@@ -148,16 +150,13 @@ class CheckpointManager:
 
     def save_metrics_json(
         self,
-        history: Dict[str, list],
+        history: dict[str, list],
         path: str = "logs/training/metrics.json",
     ) -> None:
         """Save full training history as JSON for analysis/visualization."""
         os.makedirs(os.path.dirname(path), exist_ok=True)
         # Convert numpy types to Python natives for JSON serialization
-        clean = {
-            k: [float(v) for v in vals]
-            for k, vals in history.items()
-        }
+        clean = {k: [float(v) for v in vals] for k, vals in history.items()}
         with open(path, "w") as f:
             json.dump(clean, f, indent=2)
         logger.info(f"  [Checkpoint] Metrics history saved: {path}")

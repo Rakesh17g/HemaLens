@@ -61,21 +61,21 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.utils.data import DataLoader
 
 # ── Project root on sys.path ─────────────────────────────────────────────────
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
 
-from src.training.evaluator import run_inference, compute_full_metrics, ModelEvaluator
-from src.training.visualizer import generate_all_plots
 from src.inference.confidence import ConfidenceEstimator
 from src.inference.confidence_viz import generate_confidence_plots
+from src.training.evaluator import compute_full_metrics, run_inference
+from src.training.visualizer import generate_all_plots
 
 logger = logging.getLogger("ALLEvaluation")
 
@@ -83,6 +83,7 @@ logger = logging.getLogger("ALLEvaluation")
 # ─────────────────────────────────────────────────────────────────────────────
 # EvaluationEngine
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class EvaluationEngine:
     """
@@ -104,37 +105,33 @@ class EvaluationEngine:
     >>> engine.save(results, output_dir="logs/evaluation/test")
     """
 
-    CLASS_NAMES: List[str] = ["Healthy (0)", "ALL+ (1)"]
+    CLASS_NAMES: list[str] = ["Healthy (0)", "ALL+ (1)"]  # noqa: RUF012
 
     # ── Construction ──────────────────────────────────────────────────────────
 
     def __init__(
         self,
-        model:       nn.Module,
-        device:      torch.device,
-        cfg:         Optional[Dict[str, Any]] = None,
-        threshold:   Optional[float]          = None,
-        use_amp:     bool                     = False,
-        class_names: Optional[List[str]]      = None,
+        model: nn.Module,
+        device: torch.device,
+        cfg: dict[str, Any] | None = None,
+        threshold: float | None = None,
+        use_amp: bool = False,
+        class_names: list[str] | None = None,
     ) -> None:
-        self.model       = model
-        self.device      = device
-        self.cfg         = cfg or {}
-        self.use_amp     = use_amp
+        self.model = model
+        self.device = device
+        self.cfg = cfg or {}
+        self.use_amp = use_amp
         self.class_names = class_names or self.CLASS_NAMES
 
         # Threshold: from arg → config → None (auto)
-        eval_cfg        = self.cfg.get("evaluation", {})
-        self.threshold  = (
-            threshold
-            if threshold is not None
-            else eval_cfg.get("threshold", None)
+        eval_cfg = self.cfg.get("evaluation", {})
+        self.threshold = (
+            threshold if threshold is not None else eval_cfg.get("threshold", None)
         )
 
         # Output directories
-        self.default_output_dir = eval_cfg.get(
-            "output_dir", "logs/evaluation"
-        )
+        self.default_output_dir = eval_cfg.get("output_dir", "logs/evaluation")
         self.model_name = eval_cfg.get("model_name", "EfficientNet-B0")
 
         logger.info(
@@ -147,7 +144,7 @@ class EvaluationEngine:
     def run_inference(
         self,
         loader: DataLoader,
-        split:  str = "test",
+        split: str = "test",
     ):
         """
         Run full inference over *loader* and return raw arrays.
@@ -162,11 +159,11 @@ class EvaluationEngine:
         t0 = time.perf_counter()
 
         y_true, y_prob, paths = run_inference(
-            model   = self.model,
-            loader  = loader,
-            device  = self.device,
-            use_amp = self.use_amp and self.device.type == "cuda",
-            desc    = f"{split.capitalize()} Inference",
+            model=self.model,
+            loader=loader,
+            device=self.device,
+            use_amp=self.use_amp and self.device.type == "cuda",
+            desc=f"{split.capitalize()} Inference",
         )
 
         elapsed = time.perf_counter() - t0
@@ -178,9 +175,9 @@ class EvaluationEngine:
 
     def compute_metrics(
         self,
-        y_true:    np.ndarray,
-        y_prob:    np.ndarray,
-    ) -> Dict[str, Any]:
+        y_true: np.ndarray,
+        y_prob: np.ndarray,
+    ) -> dict[str, Any]:
         """
         Compute the full metric suite from pre-collected arrays.
 
@@ -190,10 +187,10 @@ class EvaluationEngine:
         """
         logger.info("  Computing metrics …")
         results = compute_full_metrics(
-            y_true      = y_true,
-            y_prob      = y_prob,
-            threshold   = self.threshold,
-            class_names = self.class_names,
+            y_true=y_true,
+            y_prob=y_prob,
+            threshold=self.threshold,
+            class_names=self.class_names,
         )
         self._log_scalar_summary(results)
         return results
@@ -203,8 +200,8 @@ class EvaluationEngine:
     def run(
         self,
         loader: DataLoader,
-        split:  str = "test",
-    ) -> Dict[str, Any]:
+        split: str = "test",
+    ) -> dict[str, Any]:
         """
         Run inference **and** compute metrics in one call.
 
@@ -219,23 +216,23 @@ class EvaluationEngine:
         -------
         results : Complete evaluation dict — see module docstring for keys.
         """
-        logger.info(f"\n{'─'*55}")
+        logger.info(f"\n{'─' * 55}")
         logger.info(f"  EVALUATION  [{split.upper()}]")
-        logger.info(f"{'─'*55}")
+        logger.info(f"{'─' * 55}")
 
         y_true, y_prob, paths = self.run_inference(loader, split=split)
-        results               = self.compute_metrics(y_true, y_prob)
-        results["split"]      = split
-        results["paths"]      = paths
+        results = self.compute_metrics(y_true, y_prob)
+        results["split"] = split
+        results["paths"] = paths
         return results
 
     # ── Visualization ─────────────────────────────────────────────────────────
 
     def visualize(
         self,
-        results:    Dict[str, Any],
-        output_dir: Optional[str] = None,
-    ) -> Dict[str, str]:
+        results: dict[str, Any],
+        output_dir: str | None = None,
+    ) -> dict[str, str]:
         """
         Generate all 8 Matplotlib visualizations and save to *output_dir*.
 
@@ -260,10 +257,10 @@ class EvaluationEngine:
         logger.info(f"\n  Generating visualizations → {os.path.abspath(out)}/")
 
         saved = generate_all_plots(
-            results    = results,
-            output_dir = out,
-            model_name = self.model_name,
-            split      = results.get("split", "eval"),
+            results=results,
+            output_dir=out,
+            model_name=self.model_name,
+            split=results.get("split", "eval"),
         )
         logger.info(f"  {len(saved)} plots saved.")
         return saved
@@ -272,9 +269,9 @@ class EvaluationEngine:
 
     def save_metrics(
         self,
-        results:    Dict[str, Any],
+        results: dict[str, Any],
         output_dir: str,
-        prefix:     str = "",
+        prefix: str = "",
     ) -> str:
         """
         Serialize scalar metrics (JSON-safe values only) to disk.
@@ -289,9 +286,9 @@ class EvaluationEngine:
         """
         os.makedirs(output_dir, exist_ok=True)
         fname = f"{prefix}metrics.json" if prefix else "metrics.json"
-        path  = os.path.join(output_dir, fname)
+        path = os.path.join(output_dir, fname)
 
-        safe: Dict[str, Any] = {}
+        safe: dict[str, Any] = {}
         for k, v in results.items():
             if isinstance(v, (float, np.floating)):
                 safe[k] = float(v)
@@ -308,7 +305,7 @@ class EvaluationEngine:
 
     def save_arrays(
         self,
-        results:    Dict[str, Any],
+        results: dict[str, Any],
         output_dir: str,
     ) -> str:
         """
@@ -324,16 +321,16 @@ class EvaluationEngine:
         path = os.path.join(output_dir, "predictions.npz")
         np.savez_compressed(
             path,
-            y_true = results["y_true"],
-            y_prob = results["y_prob"],
-            y_pred = results["y_pred"],
+            y_true=results["y_true"],
+            y_prob=results["y_prob"],
+            y_pred=results["y_pred"],
         )
         logger.info(f"  Prediction arrays saved: {path}")
         return path
 
     def save_report(
         self,
-        results:    Dict[str, Any],
+        results: dict[str, Any],
         output_dir: str,
     ) -> str:
         """
@@ -355,10 +352,22 @@ class EvaluationEngine:
             f.write("Scalar Summary\n")
             f.write("-" * 40 + "\n")
             for key in [
-                "accuracy", "balanced_acc", "precision", "recall",
-                "f1", "f1_macro", "f1_weighted", "auc_roc", "auprc",
-                "sensitivity", "specificity", "npv", "mcc",
-                "optimal_threshold", "applied_threshold", "youden_j",
+                "accuracy",
+                "balanced_acc",
+                "precision",
+                "recall",
+                "f1",
+                "f1_macro",
+                "f1_weighted",
+                "auc_roc",
+                "auprc",
+                "sensitivity",
+                "specificity",
+                "npv",
+                "mcc",
+                "optimal_threshold",
+                "applied_threshold",
+                "youden_j",
             ]:
                 val = results.get(key, 0.0)
                 f.write(f"  {key:<25} {val:.6f}\n")
@@ -375,10 +384,10 @@ class EvaluationEngine:
 
     def save(
         self,
-        results:    Dict[str, Any],
-        output_dir: Optional[str] = None,
-        prefix:     str           = "",
-    ) -> Dict[str, str]:
+        results: dict[str, Any],
+        output_dir: str | None = None,
+        prefix: str = "",
+    ) -> dict[str, str]:
         """
         Save metrics JSON + text report + prediction arrays + all plots.
 
@@ -399,10 +408,10 @@ class EvaluationEngine:
         )
         os.makedirs(out, exist_ok=True)
 
-        saved: Dict[str, str] = {}
-        saved["metrics_json"]          = self.save_metrics(results, out, prefix)
+        saved: dict[str, str] = {}
+        saved["metrics_json"] = self.save_metrics(results, out, prefix)
         saved["classification_report"] = self.save_report(results, out)
-        saved["predictions_npz"]       = self.save_arrays(results, out)
+        saved["predictions_npz"] = self.save_arrays(results, out)
 
         # ── 8 standard evaluation plots ───────────────────────────────────
         plot_paths = self.visualize(results, output_dir=out)
@@ -411,14 +420,14 @@ class EvaluationEngine:
         # ── Confidence estimation + plots ─────────────────────────────────
         conf_dir = os.path.join(out, "confidence")
         try:
-            eval_cfg   = self.cfg.get("evaluation", {})
-            mc_passes  = eval_cfg.get("mc_dropout_passes", 0)  # 0=fast/no MC
-            threshold  = results.get("applied_threshold", 0.50)
+            eval_cfg = self.cfg.get("evaluation", {})
+            mc_passes = eval_cfg.get("mc_dropout_passes", 0)  # 0=fast/no MC
+            threshold = results.get("applied_threshold", 0.50)
 
-            estimator  = ConfidenceEstimator(
-                threshold        = float(threshold),
-                mc_dropout_passes = mc_passes,
-                use_amp          = self.use_amp,
+            estimator = ConfidenceEstimator(
+                threshold=float(threshold),
+                mc_dropout_passes=mc_passes,
+                use_amp=self.use_amp,
             )
             # Batch estimation from pre-collected probabilities (no re-inference)
             conf_results = estimator.estimate_batch(results["y_prob"])
@@ -428,6 +437,7 @@ class EvaluationEngine:
             os.makedirs(conf_dir, exist_ok=True)
             conf_json_path = os.path.join(conf_dir, "confidence_summary.json")
             import json as _json
+
             with open(conf_json_path, "w") as cf:
                 _json.dump(conf_summary, cf, indent=2)
             saved["confidence_summary_json"] = conf_json_path
@@ -435,24 +445,30 @@ class EvaluationEngine:
 
             # Print confidence explanation + summary
             print(ConfidenceEstimator.explain())
-            print(f"\n  Confidence Summary [{results.get('split','eval').upper()}]")
+            print(f"\n  Confidence Summary [{results.get('split', 'eval').upper()}]")
             print(f"  Mean Confidence : {conf_summary['mean_confidence']:.4f}")
-            print(f"  LOW risk        : {conf_summary['n_low']} "
-                  f"({conf_summary['risk_fractions']['LOW']*100:.1f}%)")
-            print(f"  MEDIUM risk     : {conf_summary['n_medium']} "
-                  f"({conf_summary['risk_fractions']['MEDIUM']*100:.1f}%)")
-            print(f"  HIGH risk       : {conf_summary['n_high']} "
-                  f"({conf_summary['risk_fractions']['HIGH']*100:.1f}%)")
+            print(
+                f"  LOW risk        : {conf_summary['n_low']} "
+                f"({conf_summary['risk_fractions']['LOW'] * 100:.1f}%)"  # type: ignore
+            )
+            print(
+                f"  MEDIUM risk     : {conf_summary['n_medium']} "
+                f"({conf_summary['risk_fractions']['MEDIUM'] * 100:.1f}%)"  # type: ignore
+            )
+            print(
+                f"  HIGH risk       : {conf_summary['n_high']} "
+                f"({conf_summary['risk_fractions']['HIGH'] * 100:.1f}%)"  # type: ignore
+            )
 
             # Generate all confidence visualizations
             conf_plot_paths = generate_confidence_plots(
-                results    = conf_results,
-                y_true     = results["y_true"],
-                output_dir = conf_dir,
+                results=conf_results,
+                y_true=results["y_true"],
+                output_dir=conf_dir,
             )
             saved.update({f"conf_{k}": v for k, v in conf_plot_paths.items()})
 
-        except Exception as exc:  # never let confidence crash the main eval
+        except Exception as exc:  # noqa: BLE001
             logger.warning(f"  Confidence estimation skipped: {exc}")
 
         logger.info(
@@ -463,23 +479,23 @@ class EvaluationEngine:
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
-    def _log_scalar_summary(self, results: Dict[str, Any]) -> None:
+    def _log_scalar_summary(self, results: dict[str, Any]) -> None:
         """Print a rich tabular metric summary to the console."""
         split = results.get("split", "eval").upper()
 
-        print(f"\n{'─'*60}")
+        print(f"\n{'─' * 60}")
         print(f"  EVALUATION RESULTS  [{split}]")
-        print(f"{'─'*60}")
+        print(f"{'─' * 60}")
 
         # ── Section 1: Core metrics ───────────────────────────────────────
         rows_core = [
-            ("Accuracy",          results["accuracy"]),
+            ("Accuracy", results["accuracy"]),
             ("Balanced Accuracy", results["balanced_acc"]),
-            ("AUC-ROC",           results["auc_roc"]),
-            ("AUPRC",             results["auprc"]),
-            ("F1 (binary)",       results["f1"]),
-            ("F1 Macro",          results["f1_macro"]),
-            ("F1 Weighted",       results["f1_weighted"]),
+            ("AUC-ROC", results["auc_roc"]),
+            ("AUPRC", results["auprc"]),
+            ("F1 (binary)", results["f1"]),
+            ("F1 Macro", results["f1_macro"]),
+            ("F1 Weighted", results["f1_weighted"]),
         ]
         print(f"\n  {'Core Metrics':─<50}")
         for name, val in rows_core:
@@ -488,13 +504,13 @@ class EvaluationEngine:
 
         # ── Section 2: Clinical metrics ───────────────────────────────────
         rows_clin = [
-            ("Precision",         results["precision"]),
-            ("Recall",            results["recall"]),
-            ("Sensitivity",       results["sensitivity"]),
-            ("Specificity",       results["specificity"]),
-            ("NPV",               results["npv"]),
-            ("MCC",               results["mcc"]),
-            ("Youden's J",        results["youden_j"]),
+            ("Precision", results["precision"]),
+            ("Recall", results["recall"]),
+            ("Sensitivity", results["sensitivity"]),
+            ("Specificity", results["specificity"]),
+            ("NPV", results["npv"]),
+            ("MCC", results["mcc"]),
+            ("Youden's J", results["youden_j"]),
         ]
         print(f"\n  {'Clinical Metrics':─<50}")
         for name, val in rows_clin:
@@ -503,7 +519,7 @@ class EvaluationEngine:
 
         # ── Section 3: Confusion matrix ───────────────────────────────────
         print(f"\n  {'Confusion Matrix':─<50}")
-        print(f"               Predicted Healthy   Predicted ALL+")
+        print("               Predicted Healthy   Predicted ALL+")
         print(f"  True Healthy    TN={results['tn']:<8}    FP={results['fp']}")
         print(f"  True ALL+       FN={results['fn']:<8}    TP={results['tp']}")
 
