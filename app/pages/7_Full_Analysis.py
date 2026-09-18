@@ -407,14 +407,21 @@ if raw_bytes:
                     )
 
                     if pdf_bytes:
+                        import base64
+                        b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
                         fname = "hemalens_medical_report.pdf"
-                        st.download_button(
-                            label="Download PDF Report",
-                            data=pdf_bytes,
-                            file_name=fname,
-                            mime="application/pdf",
-                            use_container_width=True,
+                        
+                        # Custom HTML download link to bypass Streamlit UUID caching bugs
+                        dl_link = (
+                            f'<a href="data:application/pdf;base64,{b64_pdf}" '
+                            f'download="{fname}" '
+                            f'style="display:block; text-align:center; padding:0.6rem 1rem; '
+                            f'background-color:#2563EB; color:white; text-decoration:none; '
+                            f'border-radius:4px; font-weight:600; font-size:0.9rem; margin-top:0.5rem;">'
+                            f'Download PDF Report</a>'
                         )
+                        st.markdown(dl_link, unsafe_allow_html=True)
+                        
                         st.markdown(
                             f'<div style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.4rem;">'
                             f"Ready · {len(pdf_bytes) // 1024} KB</div>",
