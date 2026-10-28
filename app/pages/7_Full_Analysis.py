@@ -408,23 +408,45 @@ if raw_bytes:
 
                     if pdf_bytes:
                         import base64
+                        import streamlit.components.v1 as components
                         b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-                        href = (
-                            f'<a href="data:application/pdf;base64,{b64}" '
-                            f'download="hemalens_medical_report.pdf" '
-                            f'style="display:block;width:100%;padding:0.6rem 1rem;'
-                            f'background:#a5f9ef;color:#050505;border-radius:6px;'
-                            f'text-align:center;font-weight:700;font-size:0.85rem;'
-                            f'text-decoration:none;font-family:Inter,sans-serif;'
-                            f'letter-spacing:0.03em;cursor:pointer;">'
-                            f'⬇ Download PDF Report</a>'
-                        )
-                        st.markdown(href, unsafe_allow_html=True)
-                        st.markdown(
-                            f'<div style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.4rem;">'
-                            f"hemalens_medical_report.pdf · {len(pdf_bytes) // 1024} KB</div>",
-                            unsafe_allow_html=True,
-                        )
+                        size_kb = len(pdf_bytes) // 1024
+                        _dl_html = f"""
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:transparent;">
+  <a id="dlbtn"
+     style="display:block;width:100%;padding:10px 16px;
+            background:#a5f9ef;color:#050505;border-radius:6px;
+            text-align:center;font-weight:700;font-size:14px;
+            text-decoration:none;font-family:Inter,sans-serif;
+            letter-spacing:0.03em;cursor:pointer;box-sizing:border-box;">
+    ⬇&nbsp; Download PDF Report
+  </a>
+  <div style="font-size:11px;color:#888;text-align:center;margin-top:5px;">
+    hemalens_medical_report.pdf &middot; {size_kb} KB
+  </div>
+  <script>
+    document.getElementById('dlbtn').addEventListener('click', function(e) {{
+      e.preventDefault();
+      var b64 = "{b64}";
+      var bin = atob(b64);
+      var buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      var blob = new Blob([buf], {{type: 'application/pdf'}});
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href   = url;
+      a.download = 'hemalens_medical_report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){{ URL.revokeObjectURL(url); }}, 2000);
+    }});
+  </script>
+</body>
+</html>"""
+                        components.html(_dl_html, height=72)
                     else:
                         st.error("Internal Error: PDF generation returned empty bytes.")
                 except Exception as e:  # noqa: BLE001
