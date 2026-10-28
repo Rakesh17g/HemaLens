@@ -407,28 +407,19 @@ if raw_bytes:
                     )
 
                     if pdf_bytes:
-                        # Write PDF with the exact desired filename so the URL
-                        # path itself contains "hemalens_medical_report.pdf".
-                        # Chrome always uses the URL's last segment as the
-                        # save-as name — no Content-Disposition header needed.
-                        _static_dir = Path(__file__).resolve().parents[1] / "static"
-                        _static_dir.mkdir(parents=True, exist_ok=True)
-                        _fpath = _static_dir / "hemalens_medical_report.pdf"
-                        _fpath.write_bytes(pdf_bytes)
-                        size_kb = len(pdf_bytes) // 1024
+                        import io as _io
+                        st.download_button(
+                            label="⬇  Download PDF Report",
+                            data=_io.BytesIO(pdf_bytes),
+                            file_name="hemalens_medical_report.pdf",
+                            mime="application/pdf",
+                            use_container_width=True,
+                            key="pdf_download_btn",
+                        )
                         st.markdown(
-                            f"""
-<a href="/app/static/hemalens_medical_report.pdf" target="_blank"
-   style="display:block;width:100%;padding:10px 16px;
-          background:#a5f9ef;color:#050505;border-radius:6px;
-          text-align:center;font-weight:700;font-size:14px;
-          text-decoration:none;font-family:Inter,sans-serif;
-          letter-spacing:0.03em;cursor:pointer;box-sizing:border-box;">
-  ⬇&nbsp; Download PDF Report
-</a>
-<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:5px;">
-  hemalens_medical_report.pdf &middot; {size_kb} KB
-</div>""",
+                            f'<div style="font-size:11px;color:var(--muted);'
+                            f'text-align:center;margin-top:4px;">'
+                            f'hemalens_medical_report.pdf &middot; {len(pdf_bytes)//1024} KB</div>',
                             unsafe_allow_html=True,
                         )
                     else:
