@@ -407,18 +407,18 @@ if raw_bytes:
                     )
 
                     if pdf_bytes:
-                        import uuid as _uuid
+                        # Write PDF with the exact desired filename so the URL
+                        # path itself contains "hemalens_medical_report.pdf".
+                        # Chrome always uses the URL's last segment as the
+                        # save-as name — no Content-Disposition header needed.
                         _static_dir = Path(__file__).resolve().parents[1] / "static"
                         _static_dir.mkdir(parents=True, exist_ok=True)
-                        _fname = f"hemalens_report_{_uuid.uuid4().hex[:8]}.pdf"
-                        _fpath = _static_dir / _fname
+                        _fpath = _static_dir / "hemalens_medical_report.pdf"
                         _fpath.write_bytes(pdf_bytes)
-                        # Streamlit static files are served at /app/static/<filename>
-                        _dl_url = f"app/static/{_fname}"
                         size_kb = len(pdf_bytes) // 1024
                         st.markdown(
                             f"""
-<a href="{_dl_url}" download="hemalens_medical_report.pdf" target="_blank"
+<a href="/app/static/hemalens_medical_report.pdf" target="_blank"
    style="display:block;width:100%;padding:10px 16px;
           background:#a5f9ef;color:#050505;border-radius:6px;
           text-align:center;font-weight:700;font-size:14px;
