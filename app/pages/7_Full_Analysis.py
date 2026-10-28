@@ -426,6 +426,7 @@ if raw_bytes:
                             st.markdown(
                                 f"""
 <a href="/app/static/hemalens_medical_report.pdf"
+   download="hemalens_medical_report.pdf"
    style="display:block;width:100%;padding:10px 16px;
           background:#a5f9ef;color:#050505;border-radius:6px;
           text-align:center;font-weight:700;font-size:14px;
