@@ -407,16 +407,22 @@ if raw_bytes:
                     )
 
                     if pdf_bytes:
-                        st.download_button(
-                            label="Download PDF Report",
-                            data=pdf_bytes,
-                            file_name="hemalens_medical_report.pdf",
-                            mime="application/pdf",
-                            use_container_width=True,
+                        import base64
+                        b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+                        href = (
+                            f'<a href="data:application/pdf;base64,{b64}" '
+                            f'download="hemalens_medical_report.pdf" '
+                            f'style="display:block;width:100%;padding:0.6rem 1rem;'
+                            f'background:#a5f9ef;color:#050505;border-radius:6px;'
+                            f'text-align:center;font-weight:700;font-size:0.85rem;'
+                            f'text-decoration:none;font-family:Inter,sans-serif;'
+                            f'letter-spacing:0.03em;cursor:pointer;">'
+                            f'⬇ Download PDF Report</a>'
                         )
+                        st.markdown(href, unsafe_allow_html=True)
                         st.markdown(
                             f'<div style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.4rem;">'
-                            f"Ready · {len(pdf_bytes) // 1024} KB</div>",
+                            f"hemalens_medical_report.pdf · {len(pdf_bytes) // 1024} KB</div>",
                             unsafe_allow_html=True,
                         )
                     else:
