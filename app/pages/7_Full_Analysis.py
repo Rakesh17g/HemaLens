@@ -408,20 +408,52 @@ if raw_bytes:
 
                     if pdf_bytes:
                         import io as _io
-                        st.download_button(
-                            label="⬇  Download PDF Report",
-                            data=_io.BytesIO(pdf_bytes),
-                            file_name="hemalens_medical_report.pdf",
-                            mime="application/pdf",
-                            use_container_width=True,
-                            key="pdf_download_btn",
-                        )
-                        st.markdown(
-                            f'<div style="font-size:11px;color:var(--muted);'
-                            f'text-align:center;margin-top:4px;">'
-                            f'hemalens_medical_report.pdf &middot; {len(pdf_bytes)//1024} KB</div>',
-                            unsafe_allow_html=True,
-                        )
+                        # ── Primary: write to static dir so filename is in URL ──
+                        # Streamlit Cloud strips Content-Disposition headers, so
+                        # st.download_button saves with UUID name. Serving via
+                        # /app/static/hemalens_medical_report.pdf embeds the
+                        # filename directly in the URL — Chrome always uses it.
+                        _static_dir = Path(__file__).resolve().parents[1] / "static"
+                        _static_ok = False
+                        try:
+                            _static_dir.mkdir(parents=True, exist_ok=True)
+                            (_static_dir / "hemalens_medical_report.pdf").write_bytes(pdf_bytes)
+                            _static_ok = True
+                        except Exception:
+                            pass
+
+                        if _static_ok:
+                            st.markdown(
+                                f"""
+<a href="/app/static/hemalens_medical_report.pdf"
+   style="display:block;width:100%;padding:10px 16px;
+          background:#a5f9ef;color:#050505;border-radius:6px;
+          text-align:center;font-weight:700;font-size:14px;
+          text-decoration:none;font-family:Inter,sans-serif;
+          letter-spacing:0.03em;cursor:pointer;box-sizing:border-box;">
+  ⬇&nbsp; Download PDF Report
+</a>
+<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px;">
+  hemalens_medical_report.pdf &middot; {len(pdf_bytes)//1024} KB
+</div>""",
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            # ── Fallback: native Streamlit button ──────────────
+                            st.download_button(
+                                label="⬇  Download PDF Report",
+                                data=_io.BytesIO(pdf_bytes),
+                                file_name="hemalens_medical_report.pdf",
+                                mime="application/pdf",
+                                use_container_width=True,
+                                key="pdf_download_btn",
+                            )
+                            st.markdown(
+                                f'<div style="font-size:11px;color:var(--muted);'
+                                f'text-align:center;margin-top:4px;">'
+                                f'hemalens_medical_report.pdf &middot; {len(pdf_bytes)//1024} KB</div>',
+                                unsafe_allow_html=True,
+                            )
                     else:
                         st.error("Internal Error: PDF generation returned empty bytes.")
                 except Exception as e:  # noqa: BLE001
